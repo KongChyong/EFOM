@@ -1,11 +1,12 @@
-About the EFOM Model
+**🧠 About the EFOM Model**
+
 The Energy Futures Optimisation Model (EFOM) is a partial equilibrium, linear programming model developed to analyse long-term decarbonisation pathways and energy system transitions under varying policy, technology, and market assumptions. It is described in detail in Chyong et al. (2024) [https://www.sciencedirect.com/science/article/pii/S2211467X24000294].
 
 EFOM is formulated in AIMMS, a modelling environment for optimisation-based applications, and solved using the IBM CPLEX solver.
 
 The model minimises total energy system costs—including capital and operational expenditures—while satisfying exogenous energy service demand, greenhouse gas (GHG) constraints, and other user-defined restrictions. It operates with hourly resolution and represents 27 European and global regions, enabling endogenous trade in primary and secondary energy carriers.
 
-Key Features:
+**🔧 Key Features:**
 - Supply & transformation sectors: Fossil fuels, renewables, nuclear, hydrogen (electrolysis and methane reformation), synthetic fuels, and LNG infrastructure.
 
 - Final consumption: Disaggregated representation of buildings, transport, and industry.
@@ -16,7 +17,8 @@ Key Features:
 
 The input dataset representing the net zero scenario modelled in Chyong et al. (2024)—calibrated to the European Commission’s 1.5°C TECH scenario from the 2050 Long-Term Strategy—is provided in the repository under /DATA IN/.
 
-▶️ How to Run EFOM
+**▶️ How to Run EFOM**
+
 To run the model:
 
 1. Install AIMMS with the IBM CPLEX solver enabled.
