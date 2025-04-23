@@ -1,0 +1,35 @@
+﻿* AIMMS
+scale_model on
+* CBC 2.9
+* CONOPT 4.1
+* COPT 6.0
+* CPLEX 22.1
+"CPLEX 22.1".LP_method 4
+"CPLEX 22.1".solution_type 2
+* CPOptimizer 22.1
+* GUROBI 11.0
+* GUROBI 9.5
+* IPOPT 3.11
+* MINOS
+* ODH-CPLEX 5.3
+* Octeract 4.7
+* PATH 4.7
+* SNOPT 7.2
+* CPLEX 12.7
+"CPLEX 12.7".LP_method 4
+"CPLEX 12.7".solution_type 2
+"CPLEX 12.7".barrier_progress_solution 1
+"CPLEX 12.7".global_thread_limit 16
+"CPLEX 12.7".barrier_convergence_tolerance 1e-007
+* CPLEX 12.10
+"CPLEX 12.10".check_solution 1
+"CPLEX 12.10".data_check_and_modeling_assistance 2
+"CPLEX 12.10".display_solution_statistics 2
+"CPLEX 12.10".LP_method 4
+"CPLEX 12.10".solution_type 2
+"CPLEX 12.10".barrier_progress_solution 1
+"CPLEX 12.10".round_coefficients 1e-05
+"CPLEX 12.10".barrier_convergence_tolerance 1e-07
+* NETSOL
+* Environment
+Default_Datafile_Folder "DATA IN"

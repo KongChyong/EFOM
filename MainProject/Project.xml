@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Project AimmsVersion="25.3.3.2 unicode x64" ProjectUUID="1C99BC56-AD96-4528-B0FA-847724C8F422">
+	<ModelFileName>210720_EFOM.ams</ModelFileName>
+	<AutoSaveAndBackup>
+		<ProjectAutoSave AtRegularInterval="true" EveryNMinutes="60" />
+		<DataBackup EveryNMinutes="60" NumBackupsDatedToday="3" NumDaysBeforeToday="3" />
+	</AutoSaveAndBackup>
+</Project>

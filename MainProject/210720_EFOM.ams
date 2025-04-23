@@ -1,0 +1,2234 @@
+## ams_version=1.0
+
+Model Main_ZESM {
+	Section INPUTS {
+		DeclarationSection MODEL_SETS {
+			Set Years {
+				Text: "set of years in the modelling horizon";
+				Index: y, yy;
+			}
+			Set Calendar_Days {
+				Text: "calendar days in the modelling horizon";
+				Index: d, dd;
+			}
+			Set Day_Types {
+				Text: "typical days or clusters";
+				Index: s, ss;
+			}
+			Set Hours {
+				Index: t, tt;
+			}
+			Set Nodes {
+				Index: n, nn, nnn;
+			}
+			Set Countries {
+				SubsetOf: Nodes;
+				Index: c, cc;
+			}
+			Set Sectors {
+				SubsetOf: Nodes;
+				Index: m, mm;
+				Definition: {
+					!data {buildings, transport, industry}
+				}
+			}
+			Set EnergyCommodity {
+				Index: i, ii, o;
+			}
+			Set ConversionTech {
+				Index: j, jj;
+			}
+		}
+		DeclarationSection DEFINITIONS {
+			Parameter TECH_LOCATION_MAP {
+				IndexDomain: (j,n);
+			}
+			Parameter TECH_INPUT_MAP {
+				IndexDomain: (j,i);
+			}
+			Parameter TECH_INPUT_MAP_REDUCED {
+				IndexDomain: (j,i);
+			}
+			Parameter TECH_OUTPUT_MAP {
+				IndexDomain: (j,i);
+			}
+			Parameter INPUT_OUTPUT_TECH {
+				IndexDomain: (i,j,ii);
+				Definition: TECH_INPUT_MAP(j,i)*TECH_OUTPUT_MAP(j,ii);
+			}
+			Parameter COMMODITY_MAP {
+				IndexDomain: (n,i)|FINAL_DEMAND_NODE(n)*ENERGY_TYPE(i)<>11;
+				Definition: {
+					if sum(j,(TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)))>0 
+					
+					or sum(j,(TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)))>0
+					
+					or sum(y,ANNUAL_DEMAND(n,i,y)*FINAL_DEMAND_NODE(n))>0
+					
+					or i="Natural_gas" and node_type(n)=8
+					
+					then 1 else 0 endif;
+				}
+			}
+			Parameter NODE_TYPE {
+				IndexDomain: n;
+			}
+			Parameter FINAL_DEMAND_NODE {
+				IndexDomain: n;
+			}
+			Parameter ENERGY_TYPE {
+				IndexDomain: i;
+			}
+			Parameter PRIM_SUPPLY {
+				IndexDomain: i;
+			}
+			Parameter TECH_TYPE {
+				IndexDomain: j;
+			}
+			Parameter POWERGEN_TECH_TYPE {
+				IndexDomain: j;
+			}
+			Parameter VRE_TECH {
+				IndexDomain: j;
+			}
+			Parameter Electrolysis_TECH {
+				IndexDomain: j;
+				Definition: {
+					if j="Electrolysis_Alkaline" or j="Electrolysis_PEM" or j="Electrolysis_SOEC" then 1 else 0 endif;
+				}
+			}
+			Parameter P2X_TECH {
+				IndexDomain: j;
+				Definition: {
+					if j="H2_Methanation_egas" or j="H2_Methanation_eliquids" then 1 else 0 endif;
+				}
+			}
+			Parameter HHP_CH4_TECH {
+				IndexDomain: j;
+				Definition: {
+					if j="HHP_CH4_e" or j="HHP_CH4_g" then 1 else 0 endif;
+				}
+			}
+			Parameter HHP_H2_TECH {
+				IndexDomain: j;
+				Definition: {
+					if j="HHP_H2_e" or j="HHP_H2_g" then 1 else 0 endif;
+				}
+			}
+			Parameter STORAGE_KEY {
+				IndexDomain: (j);
+			}
+			Parameter SEASONAL_STORAGE {
+				IndexDomain: (j);
+				Definition: {
+					if j="Underground_H2_Stor" or j="Underground_Gas_Stor" or j="Underground_CO2_Stor" then 1 else 0 endif;
+				}
+			}
+			Parameter EV_CONVERSION_KEY {
+				IndexDomain: (j);
+				Definition: {
+					if j="EV_PublicTrans" or j="EV_Cars" or j="EV_HGV" then 1 else 0 endif;
+				}
+			}
+			Parameter BATTERIES_STORAGE_KEY {
+				IndexDomain: (j);
+				Definition: {
+					if j="Utility_Batteries" or j="Residential_Batteries" then 1 else 0 endif;
+				}
+			}
+			Parameter HP_STORAGE_KEY {
+				IndexDomain: (j);
+				Definition: {
+					if j="HydroP_Stor" then 1 else 0 endif;
+				}
+			}
+			Parameter NETWORK_FLOW_TYPE {
+				IndexDomain: (i,ii);
+			}
+			Parameter INPUT_MAPPING {
+				IndexDomain: (i,ii);
+			}
+			Parameter STORAGE_INPUT_MAPPING {
+				IndexDomain: (j,i,ii)|STORAGE_KEY(j)=1 and TECH_INPUT_MAP(j,i)=1;
+				Definition: INPUT_MAPPING(i,ii);
+			}
+			Parameter EV_CHARGE_TIME {
+				IndexDomain: (t,j)|EV_CONVERSION_KEY(j)=1;
+				Definition: {
+					if j = "EV_Cars" and 
+					   ( ord(t) <= 6 
+					     or (ord(t) >= 9 and ord(t) <= 16) 
+					     or (ord(t) >= 19 and ord(t) <= card(t)) ) 
+					then 
+					    1 
+					else
+					    if (j = "EV_PublicTrans" or j = "EV_HGV") and 
+					       ( ord(t) <= 5 
+					         or ord(t) = 8 
+					         or ord(t) = 12 
+					         or ord(t) >= 18 ) 
+					    then 
+					        1 
+					    else 
+					        0 
+					    endif 
+					endif;
+				}
+			}
+			Parameter MN_EURO {
+				Definition: {
+					!1000000
+					1
+				}
+			}
+			Parameter TIME_STEP {
+				Definition: {
+					!10
+					1
+				}
+			}
+		}
+		DeclarationSection DEMAND_AND_SUPPLY_DATA {
+			Parameter ANNUAL_DEMAND {
+				IndexDomain: (m,i,y);
+			}
+			Parameter DEMAND_PROFILES {
+				IndexDomain: (s,t,m);
+			}
+			Parameter DEMAND {
+				IndexDomain: (y,s,t,i,m);
+				Definition: ANNUAL_DEMAND(m,i,y)*DEMAND_PROFILES(s,t,m);
+			}
+			Parameter AMB_TEMP {
+				IndexDomain: (s,t,n);
+			}
+			Parameter SHARE_AGR_NON_CO2_EMISSIONS {
+				IndexDomain: n;
+			}
+			Parameter SHARE_IND_NON_CO2_EMISSIONS {
+				IndexDomain: n;
+			}
+			Parameter SHARE_LULUCF_EMISSIONS {
+				IndexDomain: n;
+			}
+			Parameter IND_CO2_EMISSIONS {
+				IndexDomain: (y,n)|NODE_TYPE(n)=4;
+				Definition: {
+					109.8*1000*sum((i),ANNUAL_DEMAND(n,i,y))/sum((i,nn),ANNUAL_DEMAND(nn,i,y)$(NODE_TYPE(nn)=4))! net zero scenario
+				}
+			}
+			Parameter AGR_EXOG_CO2_EMISSIONS {
+				IndexDomain: (y,n)|NODE_TYPE(n)=3;
+				Definition: sum(i,ANNUAL_DEMAND(n,i,y)*(1-CO2_NeutralCommodity(i))*CO2_INTENSITY(i));
+			}
+			Parameter TRANS_OTH_CO2_EMISSIONS {
+				IndexDomain: (y,n)|NODE_TYPE(n)=8;
+				Definition: sum(i,ANNUAL_DEMAND(n,i,y)*(1-CO2_NeutralCommodity(i))*CO2_INTENSITY(i));
+			}
+			Parameter NON_CO2_EMISSIONS {
+				IndexDomain: (y,n);
+				Definition: {
+					60.5*1000*SHARE_IND_NON_CO2_EMISSIONS(n)+276.9*1000*SHARE_AGR_NON_CO2_EMISSIONS(n)!net zero scenario
+				}
+			}
+			Parameter LULUCF_CO2_EMISSIONS {
+				IndexDomain: (y,n);
+				Definition: {
+					if n="GB" then (-2.5)*1000 else !CCC further ambitions scenario
+					
+					(-316.9)*1000*SHARE_LULUCF_EMISSIONS(n) !EC 15TECH
+					
+					
+					
+					endif
+				}
+			}
+			Parameter TOTAL_CO2_LIMITS {
+				IndexDomain: y;
+				Definition: {
+					0 !net zero
+				}
+			}
+			Parameter TRANSPORT_CO2_LIMITS {
+				IndexDomain: y;
+				Definition: {
+					(0.8+9.7+0.8)*1000 !only for cars, HGV, other road transport net zero scenario
+				}
+			}
+			Parameter BUILDINGS_CO2_LIMITS {
+				IndexDomain: y;
+				Definition: {
+					(11.8+19.3)*1000 !net zero scenario
+				}
+			}
+			Parameter PRIMARY_SUPPLY {
+				IndexDomain: (n,i);
+			}
+		}
+		DeclarationSection NETWORKS {
+			Parameter NetworkMap {
+				IndexDomain: (n,nn);
+			}
+			Parameter CommFlowMap {
+				IndexDomain: (n,nn,i)|NetworkMap(n,nn)=1 and n<>nn and ENERGY_TYPE(i)>=3 and ENERGY_TYPE(i)<=11 or ENERGY_TYPE(i)=15;
+				Definition: {
+					if FINAL_DEMAND_NODE(n)=1 and ENERGY_TYPE(i)=10 then 1*NetworkMap(n,nn) else!allows only electricity flows from end demand nodes back to NTS
+					
+					if FINAL_DEMAND_NODE(n)=0 then NetworkMap(n,nn)*COMMODITY_MAP(n,i)*COMMODITY_MAP(nn,i)! defines flow mapping for all NTS nodes
+					
+					else 0
+					
+					endif
+					endif;
+				}
+			}
+			Parameter CX_NetworkMap {
+				IndexDomain: (n,nn,ii)|n<>nn and sum(i,NETWORK_FLOW_TYPE(i,ii))>0 and FINAL_DEMAND_NODE(n)=0 and FINAL_DEMAND_NODE(nn)=0;
+				Definition: CommFlowMap(n,nn,ii);
+			}
+			Parameter NetworkCapacity {
+				IndexDomain: (n,nn,ii)|CX_NetworkMap(n,nn,ii)=1;
+			}
+			Parameter NetworkLosses {
+				IndexDomain: (n,nn,ii)|CX_NetworkMap(n,nn,ii)=1;
+			}
+			Parameter NetworkLifetime {
+				Definition: 50;
+			}
+			Parameter NetworkDepreciationRate {
+				Definition: 1/NetworkLifetime*TIME_STEP;
+			}
+			Parameter NodeCapacity {
+				IndexDomain: (n,ii)|COMMODITY_MAP(n,ii)=1 and sum(i,NETWORK_FLOW_TYPE(i,ii))>0;
+			}
+			Parameter NodeLosses {
+				IndexDomain: (n,ii)|COMMODITY_MAP(n,ii)=1 and sum(i,NETWORK_FLOW_TYPE(i,ii))>0;
+			}
+			Parameter NodeDepreciation {
+				Definition: 1/NetworkLifetime;
+			}
+		}
+		DeclarationSection CONVERSION_TECH {
+			Parameter ConverstionCapacity {
+				IndexDomain: (j,i,n)|TECH_OUTPUT_MAP(j,i)*TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)<>11;
+			}
+			Parameter ETA_InputFactor {
+				IndexDomain: (j,i)|TECH_INPUT_MAP_REDUCED(j,i)=1 and VRE_TECH(j)=0 and j<>"AHSP" and j<>"HHP_CH4_e" and j<>"HHP_H2_e";
+			}
+			Parameter ETA_InOutFactor {
+				IndexDomain: (i,j,ii)|INPUT_OUTPUT_TECH(i,j,ii)=1 and j<>"AHSP" and j<>"HHP_CH4_e" and j<>"HHP_H2_e" and VRE_TECH(j)=0 and ENERGY_TYPE(ii)<>11 or TECH_TYPE(j)*ENERGY_TYPE(ii)=154;
+				Definition: ETA_InputFactor(j,i);
+			}
+			Parameter ETA_InputFactorHP {
+				IndexDomain: {
+					(s,t,j,i,n)|TECH_INPUT_MAP_REDUCED(j,i)=1 and NODE_TYPE(n)=3 and j="ASHP" or TECH_INPUT_MAP_REDUCED(j,i)=1 and NODE_TYPE(n)=3 and j="HHP_CH4_e"
+					or TECH_INPUT_MAP_REDUCED(j,i)=1 and NODE_TYPE(n)=3 and j="HHP_H2_e"
+				}
+				Definition: 1/[0.07*AMB_TEMP(s,t,n)+2.07];
+			}
+			Parameter ETA_InpOutFactorHP {
+				IndexDomain: (s,t,i,j,ii,n)|INPUT_OUTPUT_TECH(i,j,ii)=1 and NODE_TYPE(n)=3;
+				Definition: ETA_InputFactorHP(s,t,j,i,n);
+			}
+			Parameter Trans_Travel_Mileage {
+				IndexDomain: j;
+			}
+			Parameter Trans_Travel_Mileage_Hourly {
+				IndexDomain: (s,t,j,n);
+				Definition: {
+					if TECH_TYPE(j)>=10 and TECH_TYPE(j)<=12 then Trans_Travel_Mileage(j)*TECH_LOCATION_MAP(j,n)*DEMAND_PROFILES(s,t,n) else 1 endif;
+				}
+			}
+			Parameter EV_ElectricityRequirement_PerVehicle_Hourly {
+				IndexDomain: (s,t,j,i,n)|STORAGE_KEY(j)=1 and TECH_INPUT_MAP(j,i)=1;
+				Definition: {
+					if EV_CONVERSION_KEY(j)=1 then Trans_Travel_Mileage_Hourly(s,t,j,n)*ETA_InputFactor(j,i) else 1 endif;
+				}
+			}
+			Parameter CO2_Intensity {
+				IndexDomain: i|ENERGY_TYPE(i)<>11;
+			}
+			Parameter CO2_Intensity_biomethane_upgrade {
+				IndexDomain: i|ENERGY_TYPE(i)=7;
+				Definition: {
+					0.0802568807 !this assumes 90% capture rate for biogas to biomethane plants
+				}
+			}
+			Parameter CO2_NeutralCommodity {
+				IndexDomain: i|ENERGY_TYPE(i)<>11;
+			}
+			Parameter CO2_CaptureRate {
+				IndexDomain: (j,i)|ENERGY_TYPE(i)=11 and STORAGE_KEY(j)=0;
+			}
+			Parameter CapacityFactor {
+				IndexDomain: j|VRE_TECH(j)=0 and STORAGE_KEY(j)=0;
+			}
+			Parameter CapacityFactor_VRE {
+				IndexDomain: (s,t,j,n)|TECH_LOCATION_MAP(j,n)=1 AND VRE_TECH(j)=1;
+			}
+			Parameter RampUpFactor {
+				IndexDomain: j|VRE_TECH(j)=0 and TECH_TYPE(j)=1 or VRE_TECH(j)=0 and TECH_TYPE(j)=2;
+			}
+			Parameter RampDownFactor {
+				IndexDomain: j|VRE_TECH(j)=0 and TECH_TYPE(j)=1 or VRE_TECH(j)=0 and TECH_TYPE(j)=2;
+				Definition: RampUpFactor(j);
+			}
+			Parameter ParaLoad {
+				IndexDomain: j|TECH_TYPE(j)=1;
+			}
+			Parameter ConversionLifetime {
+				IndexDomain: j|STORAGE_KEY(j)=0;
+			}
+			Parameter ConversionDepreciation {
+				IndexDomain: j|STORAGE_KEY(j)=0;
+				Definition: 1/ConversionLifetime(j)*TIME_STEP;
+			}
+		}
+		DeclarationSection STORAGE_TECH {
+			Parameter StorageCapacity {
+				IndexDomain: (j,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=1;
+			}
+			Parameter EV_Batt_Cap {
+				IndexDomain: j|STORAGE_KEY(j)=1;
+			}
+			Parameter V2G_DeratingFactor {
+				IndexDomain: j|EV_CONVERSION_KEY(j);
+				Definition: {
+					if j="EV_Cars" then 1 else
+					if j="EV_PublicTrans" then 1 else
+					if j="EV_HGV" then 1 else
+					0
+					endif
+					endif
+					endif;
+				}
+			}
+			Parameter StorageEfficiency {
+				IndexDomain: (j)|STORAGE_KEY(j)=1;
+			}
+			Parameter StorageDuration_Charge {
+				IndexDomain: j|STORAGE_KEY(j)=1;
+			}
+			Parameter StorageDuration_Discharge {
+				IndexDomain: j|STORAGE_KEY(j)=1;
+			}
+			Parameter StorageLevel_Initial {
+				IndexDomain: (j,i,n)|STORAGE_KEY(j)=1;
+				Definition: 0;
+			}
+			Parameter StorageLifetime {
+				IndexDomain: j|STORAGE_KEY(j)=1;
+			}
+			Parameter StorageDepreciation {
+				IndexDomain: (j)|STORAGE_KEY(j)=1;
+				Definition: 1/StorageLifetime(j)*TIME_STEP;
+			}
+		}
+		DeclarationSection OPERATIONAL_COSTS {
+			Parameter VOM_technology {
+				IndexDomain: j;
+			}
+			Parameter FOM_technology {
+				IndexDomain: j;
+			}
+			Parameter CrossBorderNetwork_VOM {
+				IndexDomain: (n,nn,ii)|CX_NetworkMap(n,nn,ii)=1;
+			}
+			Parameter CrossBorderNetwork_VOM_NonZero {
+				IndexDomain: (n,nn,ii)|CX_NetworkMap(n,nn,ii)=1 or ENERGY_TYPE(ii)=3 or ENERGY_TYPE(ii)=15;
+				Definition: {
+					if CrossBorderNetwork_VOM(n,nn,ii)=0 or ENERGY_TYPE(ii)=3 or ENERGY_TYPE(ii)=15 then 1*CommFlowMap(n,nn,ii) else CrossBorderNetwork_VOM(n,nn,ii) endif;
+				}
+			}
+			Parameter CrossBorderNetwork_FOM {
+				IndexDomain: (n,nn,ii)|CX_NetworkMap(n,nn,ii)=1;
+			}
+			Parameter NationalNetwork_VOM {
+				IndexDomain: (n,ii)|COMMODITY_MAP(n,ii)=1 and sum(i,NETWORK_FLOW_TYPE(i,ii))>0;
+			}
+			Parameter NationalNetwork_FOM {
+				IndexDomain: (n,ii)|COMMODITY_MAP(n,ii)=1 and sum(i,NETWORK_FLOW_TYPE(i,ii))>0;
+			}
+			Parameter CommodityCost {
+				IndexDomain: (n,i)|ENERGY_TYPE(i)<=7 or ENERGY_TYPE(i)=12;
+			}
+			Parameter CarbonCost {
+				IndexDomain: y;
+				Definition: {
+					350000 ! net zero scenario
+				}
+			}
+			Parameter VoLL {
+				IndexDomain: (i,m)|COMMODITY_MAP(m,i)=1 and NODE_TYPE(m)>=3;
+			}
+			Parameter VRECurtailCost {
+				IndexDomain: (j,n)|VRE_TECH(j)=1 and TECH_LOCATION_MAP(j,n)=1;
+			}
+		}
+		DeclarationSection INVESTMENT_COSTS {
+			Parameter interest_rate_technologies {
+				Definition: 0.085;
+			}
+			Parameter interest_rate_networks {
+				Definition: 0.04;
+			}
+			Parameter discount_rate_general {
+				Definition: 0.04;
+			}
+			Parameter pmt_factor_conversion {
+				IndexDomain: j|STORAGE_KEY(j)=0;
+				Definition: 1/((1-1/(1+interest_rate_technologies)^ConversionLifetime(j))/interest_rate_technologies);
+			}
+			Parameter pmt_factor_storage {
+				IndexDomain: j|STORAGE_KEY(j)=1;
+				Definition: 1/((1-1/(1+interest_rate_technologies)^StorageLifetime(j))/interest_rate_technologies);
+			}
+			Parameter pmt_factor_networks {
+				Definition: 1/((1-1/(1+interest_rate_networks)^NetworkLifetime)/interest_rate_networks);
+			}
+			Parameter pmt_factor_national_networks {
+				IndexDomain: (n,i,y)|COMMODITY_MAP(n,i)=1 and sum(ii,NETWORK_FLOW_TYPE(ii,i))>0 and ENERGY_TYPE(i)<>3 and ENERGY_TYPE(i)<>15;
+				Definition: {
+					if i="Electricity" then 1 else 1/((1-1/(1+interest_rate_networks)^NetworkLifetime)/interest_rate_networks) endif;
+				}
+			}
+			Parameter DISCOUNT_FACTOR {
+				IndexDomain: y;
+				Definition: {
+					!1/(1+discount_rage_general)^(ord(y)*TIME_STEP)
+					1
+				}
+			}
+			Parameter CrossBorderCapex {
+				IndexDomain: (n,nn,i,y)|CX_NetworkMap(n,nn,i)=1;
+			}
+			Parameter NationalNetworkCapex {
+				IndexDomain: (n,i,y)|COMMODITY_MAP(n,i)=1 and sum(ii,NETWORK_FLOW_TYPE(ii,i))>0;
+			}
+			Parameter ConvStorCapex {
+				IndexDomain: (j,y);
+			}
+			Parameter TransUnits {
+				IndexDomain: j;
+				Definition: {
+					if TECH_TYPE(j)>=10 and TECH_TYPE(j)<=13 then 10^6 else 1 endif;
+					!this applies to capex and fom costs
+				}
+			}
+		}
+		DeclarationSection COUNTRY_SPECIFIC_BOUNDS {
+			Parameter PowerGenCapacity_Limit {
+				IndexDomain: (n,j,y);
+			}
+			Parameter Solar_BE_UB {
+				IndexDomain: y;
+				Definition: 26;
+			}
+			Parameter Solar_DE_UB {
+				IndexDomain: y;
+				Definition: 600;
+			}
+			Parameter Solar_FR_UB {
+				IndexDomain: y;
+				Definition: 250;
+			}
+			Parameter Solar_IT_UB {
+				IndexDomain: y;
+				Definition: 303;
+			}
+			Parameter FossilCCS_IT_UB {
+				IndexDomain: y;
+				Definition: 30;
+			}
+			Parameter HydroP_StorCapacity_FR_Limit {
+				IndexDomain: y;
+				Definition: sum(j|j="HydroP_Stor",7.5*StorageDuration_Charge(j));
+			}
+			Parameter Tidal_Wave_Country_Distribution {
+				IndexDomain: n;
+				Definition: {
+					if n="GB" then  0.04167 else
+					if n="Ireland" then 0.04167 else
+					if n="Nordic" then 0.16667 else
+					if n="BE" then 0.08333 else
+					if n="DE" then 0.04167 else
+					if n="NL" then 0.04167 else
+					if n="FR" then 0.04167 else
+					if n="IT" then 0.04167 else
+					if n="Baltics" then 0.125 else
+					if n="PL" then 0.04167 else
+					if n="SEE" then 0.25 else
+					if n="Iberia" then 0.08333 else 
+					0
+					endif
+					endif
+					endif
+					endif
+					endif
+					endif
+					endif
+					endif
+					endif
+					endif
+					endif
+					endif;
+				}
+			}
+			Parameter EV_UB {
+				IndexDomain: (j,i,n,y)|ord(y)=card(y) and j="EV_Cars" or ord(y)=card(y) and j="EV_PublicTrans" or ord(y)=card(y) and j="EV_HGV";
+				Comment: "mn vehicles";
+			}
+		}
+		DeclarationSection EU_BOUNDS {
+			Parameter TidalWave_UB {
+				IndexDomain: (y,n);
+				Definition: {
+					11.90*sum(j|j="Tidal_Wave",TECH_LOCATION_MAP(j,n))*Tidal_Wave_Country_Distribution(n) !net zero scenario
+				}
+			}
+			Parameter OnshoreWind_UB {
+				IndexDomain: y;
+				Definition: {
+					758.70 !net zero scenario
+				}
+			}
+			Parameter OffshoreWind_UB {
+				IndexDomain: y;
+				Definition: {
+					451.40! net zero scenario
+				}
+			}
+			Parameter BiomassCCS_UB {
+				IndexDomain: y;
+				Definition: {
+					49.10 !net zero scenario
+				}
+			}
+			Parameter Hydro_RoR_UB {
+				IndexDomain: y;
+				Definition: {
+					227.87! net zero scenario
+				}
+			}
+			Parameter Geothermal_UB {
+				IndexDomain: y;
+				Definition: {
+					5.04! net zero scenario
+				}
+			}
+			Parameter Battery_StorCapacity_Limit {
+				IndexDomain: y;
+				Definition: {
+					69*1!net zero scenario
+				}
+			}
+			Parameter HydroP_StorCapacity_Limit {
+				IndexDomain: y;
+				Definition: {
+					sum(j|j="HydroP_Stor", 52.43*StorageDuration_Charge(j)) !52.43 GW is historical total installed capacity, from EC LTS it is 51GW; net zero scenario
+				}
+			}
+		}
+	}
+	Section FORMULATION_VARIABLES {
+		DeclarationSection Operational_Decision_Variables {
+			Variable s_primary_supply {
+				IndexDomain: {
+					(y,s,t,i,n)|COMMODITY_MAP(n,i)=1 and NODE_TYPE(n)=1 and PRIM_SUPPLY(i)=1 or COMMODITY_MAP(n,i)=1 and node_type(n)>=5 and i="Diesel" 
+					or COMMODITY_MAP(n,i)=1 and node_type(n)>=5 and i="Gasoline"
+				}
+				Range: nonnegative;
+			}
+			Variable g_conversion {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=0;
+				Range: nonnegative;
+			}
+			Variable g_EV_conversion {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=1;
+				Range: nonnegative;
+			}
+			Variable x_consumption {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and VRE_TECH(j)=0;
+				Range: nonnegative;
+			}
+			Variable z_CO2_Capture_nonneutral {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and CO2_CaptureRate(j,i)<>0
+					and j<>"ST_Biomass_CCS" and TECH_TYPE(j)<>14
+				}
+				Range: nonnegative;
+			}
+			Variable z_CO2_Capture_neutral {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="CCGT_CCS" 
+					or TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="CCGT_CCS_oxyf" 
+					or TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="ST_Biomass_CCS"
+				}
+				Range: nonnegative;
+			}
+			Variable z_CO2_DAC_Capture_nonneutral {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and TECH_TYPE(j)=14;
+				Range: nonnegative;
+			}
+			Variable z_CO2_DAC_Capture_neutral {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and TECH_TYPE(j)=14;
+				Range: nonnegative;
+			}
+			Variable c_charge_CO2_neutral {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j="Underground_CO2_Stor";
+				Range: nonnegative;
+			}
+			Variable c_charge {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j<>"Underground_CO2_Stor" and EV_CONVERSION_KEY(j)=0 or
+					if TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and EV_CONVERSION_KEY(j)=1 and EV_CHARGE_TIME(t,j)=1 then 1 else 0 endif;
+				}
+				Range: nonnegative;
+			}
+			Variable d_discharge {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j<>"Underground_CO2_Stor";
+				Range: nonnegative;
+			}
+			Variable f_crossborder {
+				IndexDomain: (n,nn,i,y,s,t)|CommFlowMap(n,nn,i)=1;
+				Range: nonnegative;
+			}
+			Parameter load_shed {
+				IndexDomain: (y,s,t,i,m)|COMMODITY_MAP(m,i)=1;
+				Range: nonnegative;
+				Default: 0;
+			}
+		}
+		DeclarationSection Aux_Operational_Deceision_Variables {
+			Variable x_input_requirements {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP_REDUCED(j,i)=1 and STORAGE_KEY(j)=0 and VRE_TECH(j)=0;
+				Range: nonnegative;
+				Definition: {
+					sum(ii, ([g_conversion(y,s,t,j,ii,n)+z_CO2_DAC_Capture_nonneutral(y,s,t,j,ii,n)+z_CO2_DAC_Capture_neutral(y,s,t,j,ii,n)]
+					
+					*[ETA_InOutFactor(i,j,ii)+ETA_InpOutFactorHP(s,t,i,j,ii,n)]))
+				}
+			}
+			Variable d_dischargeEV {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and EV_CONVERSION_KEY(j)=1;
+				Range: nonnegative;
+				Definition: sum(ii,ETA_InOutFactor(i,j,ii)*g_EV_conversion(y,s,t,j,ii,n));
+			}
+			Variable f_national {
+				IndexDomain: (y,s,t,i,n)|COMMODITY_MAP(n,i)=1 and ENERGY_TYPE(i)=4 or COMMODITY_MAP(n,i)=1 and ENERGY_TYPE(i)>=7 and ENERGY_TYPE(i)<=11;
+				Range: nonnegative;
+				Definition: {
+					sum(j,g_conversion(y,s,t,j,i,n)*(1-ParaLoad(j)))
+					
+					+sum(j,z_CO2_Capture_nonneutral(y,s,t,j,i,n))
+					
+					+sum(j,z_CO2_Capture_neutral(y,s,t,j,i,n))
+					
+					+sum(j,z_CO2_DAC_Capture_nonneutral(y,s,t,j,i,n))
+					
+					+sum(j,z_CO2_DAC_Capture_neutral(y,s,t,j,i,n))
+					
+					+sum(nn,f_crossborder(nn,n,i,y,s,t)*(1-NetworkLosses(nn,n,i)))
+					
+					+sum(j,d_discharge(y,s,t,j,i,n))
+					
+					-sum(j|j="Residential_SolarPV",g_conversion(y,s,t,j,i,n)*(1-ParaLoad(j))) !assume behind distribution meters
+					
+					+s_primary_supply(y,s,t,i,n)
+				}
+			}
+			Variable vre_curtail {
+				IndexDomain: (y,s,t,j,i,n)|VRE_TECH(j)=1 and TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1;
+				Range: nonnegative;
+				Definition: CapacityFactor_VRE(s,t,j,n)$(VRE_TECH(j)=1)*[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg(j,i,n,y)]-g_conversion(y,s,t,j,i,n);
+			}
+			Variable c_charge_CO2_nonneutral {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j="Underground_CO2_Stor";
+				Range: nonnegative;
+				Definition: sum(jj,z_CO2_Capture_nonneutral(y,s,t,jj,i,n))+sum(jj,z_CO2_DAC_Capture_nonneutral(y,s,t,jj,i,n));
+			}
+			Variable storage_level_intra {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1;
+				Range: free;
+				Definition: {
+					storage_level_intra(y,s,t-1,j,i,n)+StorageEfficiency(j)*[c_charge(y,s,t,j,i,n)+c_charge_CO2_neutral(y,s,t,j,i,n)
+					
+					+c_charge_CO2_nonneutral(y,s,t,j,i,n)] - d_discharge(y,s,t,j,i,n) - d_dischargeEV(y,s,t,j,i,n)
+				}
+			}
+		}
+		DeclarationSection Aux_CO2_emissions_definitions {
+			Variable e_CO2_emissions_neutral {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and NODE_TYPE(n)<>2 and TECH_TYPE(j)<>14;
+				Range: nonnegative;
+				Definition: sum(ii,CO2_INTENSITY(ii)*x_consumption(y,s,t,j,ii,n)*CO2_NeutralCommodity(ii));
+			}
+			Variable e_CO2_biomethane_upgrade_neutral {
+				IndexDomain: (y,s,t,i,n)|ENERGY_TYPE(i)=11 and NODE_TYPE(n)<>2 and sum(nn,CountryMapping(n,nn))>0;
+				Range: nonnegative;
+				Definition: sum((j,ii,nn),CountryMapping(n,nn)*CO2_Intensity_biomethane_upgrade(ii)*x_consumption(y,s,t,j,ii,nn)*CO2_NeutralCommodity(ii));
+			}
+			Variable e_CO2_emissions_non_neutral {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and NODE_TYPE(n)<>2 and TECH_TYPE(j)<>14;
+				Range: nonnegative;
+				Definition: sum(ii,CO2_INTENSITY(ii)*x_consumption(y,s,t,j,ii,n)*(1-CO2_NeutralCommodity(ii)));
+			}
+			Variable e_CO2_negative_emissions {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j="Underground_CO2_Stor" and NODE_TYPE(n)<>2;
+				Range: nonnegative;
+				Definition: c_charge_CO2_neutral(y,s,t,j,i,n);
+			}
+		}
+		DeclarationSection Investment_Decision_Variables {
+			Variable kf_crossborder {
+				IndexDomain: (n,nn,i,y)|CX_NetworkMap(n,nn,i)=1;
+				Range: free;
+			}
+			Variable kf_national {
+				IndexDomain: (n,i,y)|COMMODITY_MAP(n,i)=1 and sum(ii,NETWORK_FLOW_TYPE(ii,i))>0 and ENERGY_TYPE(i)<>3 and ENERGY_TYPE(i)<>15;
+				Range: free;
+			}
+			Variable kg {
+				IndexDomain: (j,i,n,y)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=0;
+				Range: free;
+			}
+			Variable ks {
+				IndexDomain: (j,ii,n,y)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=1 and sum(i,STORAGE_INPUT_MAPPING(j,i,ii))>0 and EV_CONVERSION_KEY(j)=0;
+				Range: free;
+			}
+			Variable ks_EV {
+				IndexDomain: {
+					(j,ii,n,y)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,ii)=1 and STORAGE_KEY(j)=1 and sum(i,STORAGE_INPUT_MAPPING(j,i,ii))>0 
+					and EV_CONVERSION_KEY(j)=1
+				}
+				Range: free;
+			}
+		}
+		DeclarationSection Aux_Time_Sequence_Decision_Variables {
+			Variable g_conversion_ts {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=0 and RampUpFactor(j)<>0;
+				Range: nonnegative;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*g_conversion(y,s,t,j,i,n));
+			}
+			Variable g_conversion_initial {
+				IndexDomain: (y,d,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=0 and RampUpFactor(j)<>0;
+				Range: nonnegative;
+				Definition: sum(t|ord(t)=card(t),g_conversion_ts(y,d,t,j,i,n));
+			}
+			Variable storage_level_inter {
+				IndexDomain: {
+					(y,d,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and sum(s,TIMESEQUENCE_MATRIX(d,s))>0 and SEASONAL_STORAGE(j)=1
+					or TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and sum(s,TIMESEQUENCE_MATRIX(d,s))>0 and EV_CONVERSION_KEY(j)=1
+				}
+				Range: nonnegative;
+				Definition: storage_level_inter(y,d-1,j,i,n)+ sum((s,t)|ord(t)=card(t),TIMESEQUENCE_MATRIX(d-1,s)*storage_level_intra(y,s,t,j,i,n));
+			}
+			Variable total_storage_level_state {
+				IndexDomain: {
+					(y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and sum(s,TIMESEQUENCE_MATRIX(d,s))>0 and SEASONAL_STORAGE(j)=1
+					or TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and sum(s,TIMESEQUENCE_MATRIX(d,s))>0 and EV_CONVERSION_KEY(j)=1
+				}
+				Range: nonnegative;
+				Definition: storage_level_inter(y,d,j,i,n)+sum(s,TIMESEQUENCE_MATRIX(d,s)*storage_level_intra(y,s,t,j,i,n));
+			}
+		}
+		DeclarationSection Aux_Costs_Variables {
+			Variable v_opex_commodity {
+				Range: free;
+				Definition: sum((y,s,t,i,n), DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*s_primary_supply(y,s,t,i,n)*CommodityCost(n,i)$(ENERGY_TYPE(i)<>11))/MN_EURO;
+			}
+			Variable v_opex_network_x {
+				Range: free;
+				Definition: {
+					sum((n,nn,ii,y,s,t),DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*sum(i,f_crossborder(n,nn,i,y,s,t)*NETWORK_FLOW_TYPE(i,ii))*CrossBorderNetwork_VOM_NonZero(n,nn,ii))/MN_EURO
+					
+					+sum((n,nn,i,y),DISCOUNT_FACTOR(y)*[NetworkCapacity(n,nn,i)*(1-NetworkDepreciationRate)^(ord(y))
+					
+					+kf_crossborder(n,nn,i,y)]*CrossBorderNetwork_FOM(n,nn,i))/MN_EURO
+				}
+			}
+			Variable v_opex_network_n {
+				Range: free;
+				Definition: {
+					sum((n,ii,y,s,t),DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*sum(i,f_national(y,s,t,i,n)*NETWORK_FLOW_TYPE(i,ii))*NationalNetwork_VOM(n,ii))/MN_EURO
+					
+					+sum((n,i,y),DISCOUNT_FACTOR(y)*[NodeCapacity(n,i)*(1-NodeDepreciation)^(ord(y))+kf_national(n,i,y)]*NationalNetwork_FOM(n,i))/MN_EURO
+				}
+			}
+			Variable v_opex_conversion {
+				Range: free;
+				Definition: {
+					sum((j,i,y,s,t,n),DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*g_conversion(y,s,t,j,i,n)*VOM_technology(j))/MN_EURO
+					
+					+sum((j,i,n,y),DISCOUNT_FACTOR(y)*[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg(j,i,n,y)]*(FOM_technology(j)*TransUnits(j)))/MN_EURO
+					
+					+sum((j,i,y,s,t,n),DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*[z_CO2_DAC_Capture_nonneutral(y,s,t,j,i,n)+z_CO2_DAC_Capture_neutral(y,s,t,j,i,n)]*VOM_technology(j))/MN_EURO
+				}
+			}
+			Variable v_opex_storage {
+				Range: free;
+				Definition: {
+					sum((j,i,y,s,t,n)|EV_CONVERSION_KEY(j)=0,DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*[c_charge(y,s,t,j,i,n)+d_discharge(y,s,t,j,i,n)]*VOM_technology(j)*0.5)/MN_EURO
+					
+					+sum((j,i,y,s,t,n)|EV_CONVERSION_KEY(j)=1,DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*(g_EV_conversion(y,s,t,j,i,n)*VOM_technology(j)+[c_charge(y,s,t,j,i,n)+d_discharge(y,s,t,j,i,n)]*7660))/MN_EURO
+					
+					+sum((j,i,n,y),DISCOUNT_FACTOR(y)*[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks(j,i,n,y)]*FOM_technology(j))/MN_EURO
+					
+					+sum((j,i,n,y),DISCOUNT_FACTOR(y)*[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks_EV(j,i,n,y)]*FOM_technology(j)*TransUnits(j))/MN_EURO
+				}
+			}
+			Variable v_opex_carbon {
+				Range: free;
+				Default: 0;
+				Definition: {
+					sum((y,s,t,j,i,n),DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*[e_CO2_emissions_non_neutral(y,s,t,j,i,n)$(TECH_TYPE(j)<=2)]*CarbonCost(y))/MN_EURO !CO2 emissions ENDOGENOUS
+					
+					+sum((y,n),DISCOUNT_FACTOR(y)*IND_CO2_EMISSIONS(y,n)*CarbonCost(y))/MN_EURO !CO2e emissions IND EXOGENOUS
+					
+					-sum((y,s,t,j,i,n),DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*[c_charge_CO2_nonneutral(y,s,t,j,i,n)]*CarbonCost(y))/MN_EURO!CO2 sequestration
+				}
+			}
+			Variable v_opex_vre_curtail {
+				Range: free;
+				Definition: sum((y,s,t,j,i,n),DISCOUNT_FACTOR(y)*CLUSTER_WEIGHTS(s)*vre_curtail(y,s,t,j,i,n)*VRECurtailCost(j,n))/MN_EURO;
+			}
+			Variable v_capex_networks {
+				Range: free;
+				Definition: {
+					sum((n,nn,i,y), DISCOUNT_FACTOR(y)*pmt_factor_networks*[kf_crossborder(n,nn,i,y)-(1-NetworkDepreciationRate)*kf_crossborder(n,nn,i,y-1)+NetworkCapacity(n,nn,i)]*CrossBorderCapex(n,nn,i,y))/MN_EURO
+					
+					+sum((n,i,y), DISCOUNT_FACTOR(y)*pmt_factor_national_networks(n,i,y)*[kf_national(n,i,y)-(1-NodeDepreciation)*kf_national(n,i,y-1)]*NationalNetworkCapex(n,i,y))/MN_EURO
+				}
+			}
+			Variable v_capex_conversion {
+				Range: free;
+				Definition: {
+					sum((j,i,n,y), DISCOUNT_FACTOR(y)*pmt_factor_conversion(j)*[kg(j,i,n,y)-(1-ConversionDepreciation(j))*kg(j,i,n,y-1)+ConverstionCapacity(j,i,n)]
+					
+					*TransUnits(j)*ConvStorCapex(j,y)$(STORAGE_KEY(j)=0))/MN_EURO
+				}
+			}
+			Variable v_capex_storage {
+				Range: free;
+				Definition: {
+					sum((j,i,y,n), DISCOUNT_FACTOR(y)*pmt_factor_storage(j)*
+					
+					[ks(j,i,n,y)-(1-StorageDepreciation(j))*ks(j,i,n,y-1)+StorageCapacity(j,n)]*ConvStorCapex(j,y)$(STORAGE_KEY(j)=1))/MN_EURO
+					
+					+sum((j,i,y,n), DISCOUNT_FACTOR(y)*pmt_factor_storage(j)*
+					
+					[ks_EV(j,i,n,y)-(1-StorageDepreciation(j))*ks_EV(j,i,n,y-1)+StorageCapacity(j,n)]
+					
+					*TransUnits(j)*ConvStorCapex(j,y)$(STORAGE_KEY(j)=1))/MN_EURO
+				}
+			}
+			Parameter v_opex_energy_unmet {
+				Range: free;
+				Definition: sum((y,s,t,i,n),CLUSTER_WEIGHTS(s)*load_shed(y,s,t,i,n)*VOLL(i,n));
+			}
+			Parameter total_sys_cost {
+				Definition: [v_opex_commodity+v_opex_network_x+v_opex_network_n+v_opex_conversion+v_opex_storage+v_opex_carbon+v_capex_networks+v_capex_conversion+v_capex_storage]/1000000000;
+			}
+		}
+	}
+	Section FORMULATION_CONSTRAINTS {
+		DeclarationSection System_constraints {
+			Constraint nodal_balance_constraint {
+				IndexDomain: (n,i,y,s,t)|COMMODITY_MAP(n,i)=1;
+				Property: ShadowPrice;
+				Definition: {
+					sum(j,g_conversion(y,s,t,j,i,n)*(1-ParaLoad(j))*(1-NodeLosses(n,i)))
+					
+					+sum(j,g_EV_conversion(y,s,t,j,i,n))
+					
+					+sum(j,z_CO2_Capture_nonneutral(y,s,t,j,i,n))
+					
+					+sum(j,z_CO2_Capture_neutral(y,s,t,j,i,n))
+					
+					+sum(j,z_CO2_DAC_Capture_nonneutral(y,s,t,j,i,n))
+					
+					+sum(j,z_CO2_DAC_Capture_neutral(y,s,t,j,i,n))
+					
+					+sum(nn,f_crossborder(nn,n,i,y,s,t)*(1-NetworkLosses(nn,n,i))*(1-NodeLosses(n,i)))
+					
+					+sum(j,d_discharge(y,s,t,j,i,n)*(1-NodeLosses(n,i)))
+					
+					+s_primary_supply(y,s,t,i,n)*(1-NodeLosses(n,i))
+					
+					+e_CO2_biomethane_upgrade_neutral(y,s,t,i,n)
+					
+					=
+					
+					[DEMAND(y,s,t,i,n)-load_shed(y,s,t,i,n)]
+					
+					+sum(j,x_consumption(y,s,t,j,i,n))
+					
+					+sum(nn,f_crossborder(n,nn,i,y,s,t))
+					
+					+sum(j,c_charge(y,s,t,j,i,n))
+					
+					+sum(j,c_charge_CO2_neutral(y,s,t,j,i,n))
+					
+					+sum(j,c_charge_CO2_nonneutral(y,s,t,j,i,n))
+				}
+			}
+			Constraint Total_CO2_Emission_constraint {
+				IndexDomain: (y)|ord(y)=card(y);
+				Property: ShadowPrice;
+				Definition: {
+					sum((s,t,j,i,n),CLUSTER_WEIGHTS(s)*e_CO2_emissions_non_neutral(y,s,t,j,i,n)) !CO2 emissions ENDOGENOUS
+					
+					+sum(n,IND_CO2_EMISSIONS(y,n)) !CO2e emissions IND EXOGENOUS
+					
+					+sum(n,AGR_EXOG_CO2_EMISSIONS(y,n)) !CO2e emissions AGR EXOG FUELS
+					
+					+sum(n,TRANS_OTH_CO2_EMISSIONS(y,n))!CO2 emissions in other transport sector
+					
+					+sum(n,NON_CO2_EMISSIONS(y,n))! non-CO2 emissions
+					
+					+sum(n,LULUCF_CO2_EMISSIONS(y,n)) !LULUCF
+					
+					-sum((s,t,j,i,n),CLUSTER_WEIGHTS(s)*[c_charge_CO2_nonneutral(y,s,t,j,i,n)])!CO2 sequestration non neutral
+					
+					<=
+					
+					[TOTAL_CO2_LIMITS(y)]
+					
+					+sum((s,t,j,i,n),CLUSTER_WEIGHTS(s)*e_CO2_negative_emissions(y,s,t,j,i,n)) !negative emissions from BECCS
+				}
+			}
+			Constraint Transport_CO2_Emission_constraint {
+				IndexDomain: (y)|ord(y)=card(y);
+				Property: ShadowPrice;
+				Definition: {
+					sum((s,t,j,i,n)|NODE_TYPE(n)>=5 and NODE_TYPE(n)<=7,CLUSTER_WEIGHTS(s)*e_CO2_emissions_non_neutral(y,s,t,j,i,n)) !CO2 non neutral emissions transport sector
+					
+					<= TRANSPORT_CO2_LIMITS(y)
+				}
+			}
+			Constraint Buildings_CO2_Emission_constraint {
+				IndexDomain: (y)|ord(y)=card(y);
+				Property: ShadowPrice;
+				Definition: {
+					sum((s,t,j,i,n)|NODE_TYPE(n)=3,CLUSTER_WEIGHTS(s)*e_CO2_emissions_non_neutral(y,s,t,j,i,n)) !CO2 non neutral emissions building sector
+					
+					<= BUILDINGS_CO2_LIMITS(y)
+				}
+			}
+		}
+		DeclarationSection Conversion_and_ramping_constraints {
+			Constraint conversion_upper_limit {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=0;
+				Property: ShadowPrice;
+				Definition: {
+					g_conversion(y,s,t,j,i,n)*[1/Trans_Travel_Mileage_Hourly(s,t,j,n)]
+					
+					<=
+					
+					[CapacityFactor(j)$(VRE_TECH(j)=0)+CapacityFactor_VRE(s,t,j,n)$(VRE_TECH(j)=1)]*
+					
+					[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg(j,i,n,y)]
+				}
+			}
+			Constraint conversion_rampup_1 {
+				IndexDomain: {
+					(y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and RampUpFactor(j)<>0 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0
+					and ord(t)=1 and ord(d)>1
+				}
+				Definition: g_conversion_ts(y,d,t,j,i,n)-g_conversion_initial(y,d-1,j,i,n)<=RampUpFactor(j)*[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg(j,i,n,y)];
+			}
+			Constraint conversion_rampup_2 {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and RampUpFactor(j)<>0 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0 and ord(t)>1;
+				Definition: g_conversion(y,s,t,j,i,n)-g_conversion(y,s,t-1,j,i,n)<=RampUpFactor(j)*[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg(j,i,n,y)];
+			}
+			Constraint conversion_rampdown_1 {
+				IndexDomain: {
+					(y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and RampDownFactor(j)<>0 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0 
+					and ord(t)=1 and ord(d)>1
+				}
+				Definition: g_conversion_initial(y,d-1,j,i,n)-g_conversion_ts(y,d,t,j,i,n)<=RampDownFactor(j)*[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg(j,i,n,y)];
+			}
+			Constraint conversion_rampdown_2 {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and RampDownFactor(j)<>0 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0 and ord(t)>1;
+				Definition: g_conversion(y,s,t-1,j,i,n)-g_conversion(y,s,t,j,i,n)<=RampDownFactor(j)*[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg(j,i,n,y)];
+			}
+			Constraint conversion_divestment {
+				IndexDomain: (y,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0;
+				Definition: kg(j,i,n,y)-(1-ConversionDepreciation(j))*kg(j,i,n,y-1)>=0;
+			}
+			Constraint conversion_balance {
+				IndexDomain: (y,s,t,j,ii,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP_REDUCED(j,ii)=1 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0 and VRE_TECH(j)=0;
+				Property: ShadowPrice;
+				Definition: sum(i,x_consumption(y,s,t,j,i,n)*INPUT_MAPPING(i,ii))=x_input_requirements(y,s,t,j,ii,n);
+			}
+			Constraint HHP_CH4_investment {
+				IndexDomain: (y,i,n)|NODE_TYPE(n)=3 and ENERGY_TYPE(i)=13;
+				Definition: sum(j|j="HHP_CH4_g",kg(j,i,n,y))=6*sum(j|j="HHP_CH4_e",kg(j,i,n,y));
+			}
+			Constraint HHP_H2_investment {
+				IndexDomain: (y,i,n)|NODE_TYPE(n)=3 and ENERGY_TYPE(i)=13;
+				Definition: sum(j|j="HHP_H2_g",kg(j,i,n,y))=6*sum(j|j="HHP_H2_e",kg(j,i,n,y));
+			}
+		}
+		DeclarationSection Energy_Storage_Constraints {
+			Constraint charge_limit {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=1 and sum(ii,STORAGE_INPUT_MAPPING(j,ii,i))>0 and EV_CONVERSION_KEY(j)=0;
+				Definition: {
+					sum(ii,STORAGE_INPUT_MAPPING(j,ii,i)*[c_charge(y,s,t,j,ii,n)+c_charge_CO2_neutral(y,s,t,j,ii,n)+c_charge_CO2_nonneutral(y,s,t,j,ii,n)])<=
+					
+					(1/StorageDuration_Charge(j))*[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks(j,i,n,y)]
+				}
+			}
+			Constraint discharge_limit {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=1 and j<>"Underground_CO2_Stor" and sum(ii,STORAGE_INPUT_MAPPING(j,ii,i))>0 
+					and EV_CONVERSION_KEY(j)=0
+				}
+				Definition: {
+					sum(ii,STORAGE_INPUT_MAPPING(j,ii,i)*[d_discharge(y,s,t,j,ii,n)])
+					
+					<=(1/StorageDuration_Discharge(j))*[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks(j,i,n,y)]
+				}
+			}
+			Constraint storage_level_intra_capacity {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=1 and SEASONAL_STORAGE(j)=0 and sum(ii,STORAGE_INPUT_MAPPING(j,ii,i))>0 
+					and EV_CONVERSION_KEY(j)=0
+				}
+				Definition: {
+					sum(ii,STORAGE_INPUT_MAPPING(j,ii,i)*storage_level_intra(y,s,t,j,ii,n))
+					
+					<= 
+					
+					[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks(j,i,n,y)]
+				}
+			}
+			Constraint storage_level_inter_capacity {
+				IndexDomain: {
+					(y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=1 and SEASONAL_STORAGE(j)=1 and sum(s,TIMESEQUENCE_MATRIX(d,s))>0 
+					and sum(ii,STORAGE_INPUT_MAPPING(j,ii,i))>0 and EV_CONVERSION_KEY(j)=0
+				}
+				Definition: {
+					sum(ii,STORAGE_INPUT_MAPPING(j,ii,i)*total_storage_level_state(y,d,t,j,ii,n))
+					
+					<= 
+					
+					[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks(j,i,n,y)]
+				}
+			}
+			Constraint storage_level_boundary {
+				IndexDomain: {
+					(y,s,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and EV_CONVERSION_KEY(j)=0 
+					and SEASONAL_STORAGE(j)=0
+				}
+				Definition: sum(t|ord(t)=card(t),storage_level_intra(y,s,t,j,i,n)) = 0;
+			}
+			Constraint storage_level_nonnegativity {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)*(1-SEASONAL_STORAGE(j))=1
+					and STORAGE_KEY(j)*(1-EV_CONVERSION_KEY(j))=1 and ord(t)<>card(t)
+				}
+				Definition: storage_level_intra(y,s,t,j,i,n)>=0;
+			}
+			Constraint storage_divestment {
+				IndexDomain: (j,i,n,y)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=1 and sum(ii,STORAGE_INPUT_MAPPING(j,ii,i))>0 and EV_CONVERSION_KEY(j)=0;
+				Definition: ks(j,i,n,y)-(1-StorageDepreciation(j))*ks(j,i,n,y-1)>=0;
+			}
+		}
+		DeclarationSection EV_Constraints {
+			Constraint EV_conversion_upper_limit {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=1;
+				Property: ShadowPrice;
+				Definition: {
+					sum(ii,g_EV_conversion(y,s,t,j,ii,n))*[1/Trans_Travel_Mileage_Hourly(s,t,j,n)]
+					
+					<=
+					
+					[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks_EV(j,i,n,y)]
+				}
+			}
+			Constraint EV_charge_limit {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and EV_CONVERSION_KEY(j)=1 and EV_CHARGE_TIME(t,j)=1;
+				Definition: c_charge(y,s,t,j,i,n)<=(1/StorageDuration_Charge(j))*[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks_EV(j,i,n,y)*EV_Batt_Cap(j)];
+			}
+			Constraint EV_discharge_limit {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and EV_CONVERSION_KEY(j)=1;
+				Definition: d_discharge(y,s,t,j,i,n)+d_dischargeEV(y,s,t,j,i,n)<=(1/StorageDuration_Discharge(j))*[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks_EV(j,i,n,y)*EV_Batt_Cap(j)];
+			}
+			Constraint EV_storage_level_inter_capacity {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and EV_CONVERSION_KEY(j)=1 and sum(s,TIMESEQUENCE_MATRIX(d,s))>0;
+				Definition: {
+					(total_storage_level_state(y,d,t,j,i,n))$(EV_CONVERSION_KEY(j)=1)
+					
+					<= 
+					
+					[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks_EV(j,i,n,y)*EV_Batt_Cap(j)*V2G_DeratingFactor(j)]
+				}
+			}
+			Constraint EV_stock_divestment {
+				IndexDomain: (j,i,n,y)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and EV_CONVERSION_KEY(j)=1;
+				Definition: ks_EV(j,i,n,y)-(1-StorageDepreciation(j))*ks_EV(j,i,n,y-1)>=0;
+			}
+		}
+		DeclarationSection Network_constraints {
+			Constraint cross_border_network_constraint {
+				IndexDomain: (n,nn,ii,y,s,t)|CX_NetworkMap(n,nn,ii)=1;
+				Definition: {
+					sum(i,f_crossborder(n,nn,i,y,s,t)*NETWORK_FLOW_TYPE(i,ii))<=
+					
+					NetworkCapacity(n,nn,ii)*(1-NetworkDepreciationRate)^(ord(y))+kf_crossborder(n,nn,ii,y)
+				}
+			}
+			Constraint cross_border_network_divestment {
+				IndexDomain: (n,nn,ii,y)|CX_NetworkMap(n,nn,ii)=1;
+				Definition: kf_crossborder(n,nn,ii,y)-(1-NetworkDepreciationRate)*kf_crossborder(n,nn,ii,y-1)>=0;
+			}
+			Constraint national_network_constraint {
+				IndexDomain: (y,s,t,ii,n)|COMMODITY_MAP(n,ii)=1 and sum(i,NETWORK_FLOW_TYPE(i,ii))>0 and ENERGY_TYPE(ii)<>3 and ENERGY_TYPE(ii)<>15;
+				Definition: {
+					sum(i,f_national(y,s,t,i,n)*NETWORK_FLOW_TYPE(i,ii))
+					
+					<=NodeCapacity(n,ii)*(1-NodeDepreciation)^(ord(y))+kf_national(n,ii,y)
+				}
+			}
+			Constraint national_network_divestment {
+				IndexDomain: (n,ii,y)|COMMODITY_MAP(n,ii)=1 and sum(i,NETWORK_FLOW_TYPE(i,ii))>0 and ENERGY_TYPE(ii)<>3 and ENERGY_TYPE(ii)<>15;
+				Definition: kF_national(n,ii,y)-(1-NodeDepreciation)*kF_national(n,ii,y-1)>=0;
+			}
+		}
+		DeclarationSection CO2_Capture_and_Storage_constraints {
+			Constraint PowerStationCO2_Neutral_CaptureRate_constraint {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="CCGT_CCS" 
+					or TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="CCGT_CCS_oxyf" 
+					or TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="ST_Biomass_CCS"
+				}
+				Definition: z_CO2_Capture_neutral(y,s,t,j,i,n)<=e_CO2_emissions_neutral(y,s,t,j,i,n)*CO2_CaptureRate(j,i);
+			}
+			Constraint PowerStationCO2_NonNeutral_CaptureRate_constraint {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and CO2_CaptureRate(j,i)<>0 
+										and j<>"ST_Biomass_CCS" and TECH_TYPE(j)<>14
+				}
+				Definition: z_CO2_Capture_nonneutral(y,s,t,j,i,n)<=e_CO2_emissions_non_neutral(y,s,t,j,i,n)*CO2_CaptureRate(j,i);
+			}
+			Constraint PowerStationCO2_Total_Capture_constraint {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and CO2_CaptureRate(j,i)<>0 and TECH_TYPE(j)<>14;
+				Definition: {
+					z_CO2_Capture_nonneutral(y,s,t,j,i,n)+z_CO2_Capture_neutral(y,s,t,j,i,n)<=
+					
+					[e_CO2_emissions_non_neutral(y,s,t,j,i,n)+e_CO2_emissions_neutral(y,s,t,j,i,n)]*CO2_CaptureRate(j,i)
+				}
+			}
+			Constraint DAC_CO2_Neutral_CaptureRate_constraint {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="DAC";
+				Definition: {
+					z_CO2_DAC_Capture_neutral(y,s,t,j,i,n)<=
+					
+					sum((jj,nn),CountryMapping(n,nn)*[e_CO2_emissions_neutral(y,s,t,jj,i,nn)-z_CO2_Capture_neutral(y,s,t,jj,i,nn)])*CO2_CaptureRate(j,i)
+				}
+			}
+			Constraint DAC_CO2_NonNeutral_CaptureRate_constraint {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and ENERGY_TYPE(i)=11 and j="DAC";
+				Definition: {
+					z_CO2_DAC_Capture_nonneutral(y,s,t,j,i,n)<=
+					sum((jj,nn),CountryMapping(n,nn)*[e_CO2_emissions_non_neutral(y,s,t,jj,i,nn)-z_CO2_Capture_nonneutral(y,s,t,jj,i,nn)])*CO2_CaptureRate(j,i)
+				}
+			}
+			Constraint DAC_CO2_Total_Capture_constraint {
+				IndexDomain: {
+					(y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 
+					and CO2_CaptureRate(j,i)<>0 and TECH_TYPE(j)=14
+				}
+				Definition: {
+					z_CO2_DAC_Capture_neutral(y,s,t,j,i,n)+z_CO2_DAC_Capture_nonneutral(y,s,t,j,i,n)<=
+					
+					sum((jj,nn),CountryMapping(n,nn)*[e_CO2_emissions_neutral(y,s,t,jj,i,nn)+e_CO2_emissions_non_neutral(y,s,t,jj,i,nn)
+					-z_CO2_Capture_neutral(y,s,t,jj,i,nn)-z_CO2_Capture_nonneutral(y,s,t,jj,i,nn)])*CO2_CaptureRate(j,i)
+				}
+			}
+			Constraint CO2_Neutral_StorageRate_constraint {
+				IndexDomain: (y,s,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j="Underground_CO2_Stor";
+				Definition: {
+					c_charge_CO2_neutral(y,s,t,j,i,n)<=
+					
+					sum(jj,z_CO2_Capture_neutral(y,s,t,jj,i,n))+sum(jj,z_CO2_DAC_Capture_neutral(y,s,t,jj,i,n))
+					
+					+e_CO2_biomethane_upgrade_neutral(y,s,t,i,n)
+				}
+			}
+		}
+		DeclarationSection Country_specific_constraints {
+			Constraint PowerGenCapacity_constraint {
+				IndexDomain: (n,j,y)|TECH_LOCATION_MAP(j,n)=1 and PowerGenCapacity_Limit(n,j,y)>0;
+				Definition: sum((i),ConverstionCapacity(j,i,n)+kg(j,i,n,y))<=PowerGenCapacity_Limit(n,j,y);
+			}
+			Constraint Solar_BE_constraint {
+				IndexDomain: (y);
+				Definition: {
+					sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="BE",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					+sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="BE_Buildings",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					<=Solar_BE_UB(y)
+				}
+			}
+			Constraint Solar_DE_constraint {
+				IndexDomain: (y);
+				Definition: {
+					sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="DE",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					+sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="DE_Buildings",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					<=Solar_DE_UB(y)
+				}
+			}
+			Constraint Solar_FR_constraint {
+				IndexDomain: (y);
+				Definition: {
+					sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="FR",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					+sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="FR_Buildings",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					<=Solar_FR_UB(y)
+				}
+			}
+			Constraint Solar_IT_constraint {
+				IndexDomain: (y);
+				Definition: {
+					sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="IT",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					+sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3 and n="IT_Buildings",ConverstionCapacity(j,i,n)+kg(j,i,n,y))
+					
+					<=Solar_IT_UB(y)
+				}
+			}
+			Constraint FossilCCS_IT_constraint {
+				IndexDomain: (n,y)|n="IT";
+				Definition: sum((j,i)|POWERGEN_TECH_TYPE(j)=7,kg(j,i,n,y))<=FossilCCS_IT_UB(y);
+			}
+			Constraint HydroP_StorCapacity_FR_UB {
+				IndexDomain: (n,y)|n="FR";
+				Definition: sum((j)|HP_STORAGE_KEY(j)=1,StorageCapacity(j,n))+sum((j,i)|HP_STORAGE_KEY(j)=1,ks(j,i,n,y))<=HydroP_StorCapacity_FR_Limit(y);
+			}
+			Constraint TidalWave_constraint {
+				IndexDomain: (y,n)|TidalWave_UB(y,n)>0;
+				Definition: sum((j,i)|j="Tidal_Wave",[ConverstionCapacity(j,i,n)+kg(j,i,n,y)])<=TidalWave_UB(y,n);
+			}
+			Constraint Total_CO2_Emission_constraint_UK {
+				IndexDomain: (y)|ord(y)=card(y);
+				Property: ShadowPrice;
+				Definition: {
+					sum[n|n="GB" or n="GB_Buildings" or n="GB_Industry" or n="GB_Trans_Cars" or n="GB_Trans_HGV" or n="GB_Trans_Public" or n="GB_Trans_Oth",
+					
+					+sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_emissions_non_neutral(y,s,t,j,i,n)) !CO2 emissions ENDOGENOUS
+					
+					+IND_CO2_EMISSIONS(y,n) !CO2e emissions IND EXOGENOUS
+					
+					+AGR_EXOG_CO2_EMISSIONS(y,n) !CO2e emissions AGR EXOG FUELS
+					
+					+TRANS_OTH_CO2_EMISSIONS(y,n)!CO2 emissions in other transport sector
+					
+					+NON_CO2_EMISSIONS(y,n)! non-CO2 emissions
+					
+					+LULUCF_CO2_EMISSIONS(y,n) !LULUCF
+					
+					+sum((nn,i,s,t)|ENERGY_TYPE(i)=11, CLUSTER_WEIGHTS(s)*[f_crossborder(nn,n,i,y,s,t)-f_crossborder(n,nn,i,y,s,t)])! net import of CO2
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*[c_charge_CO2_nonneutral(y,s,t,j,i,n)])!CO2 sequestration
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_negative_emissions(y,s,t,j,i,n))!negative emissions from BECCS
+					
+					] 
+					
+					=
+					
+					TOTAL_CO2_LIMITS(y)
+				}
+			}
+			Constraint Total_CO2_Emission_constraint_FR {
+				IndexDomain: (y)|ord(y)=card(y);
+				Property: ShadowPrice;
+				Definition: {
+					sum[n|n="FR" or n="FR_Buildings" or n="FR_Industry" or n="FR_Trans_Cars" or n="FR_Trans_HGV" or n="FR_Trans_Public" or n="FR_Trans_Oth",
+					
+					+sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_emissions_non_neutral(y,s,t,j,i,n)) !CO2 emissions ENDOGENOUS
+					
+					+IND_CO2_EMISSIONS(y,n) !CO2e emissions IND EXOGENOUS
+					
+					+AGR_EXOG_CO2_EMISSIONS(y,n) !CO2e emissions AGR EXOG FUELS
+					
+					+TRANS_OTH_CO2_EMISSIONS(y,n)!CO2 emissions in other transport sector
+					
+					+NON_CO2_EMISSIONS(y,n)! non-CO2 emissions
+					
+					+LULUCF_CO2_EMISSIONS(y,n) !LULUCF
+					
+					+sum((nn,i,s,t)|ENERGY_TYPE(i)=11, CLUSTER_WEIGHTS(s)*[f_crossborder(nn,n,i,y,s,t)-f_crossborder(n,nn,i,y,s,t)])! net import of CO2
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*[c_charge_CO2_nonneutral(y,s,t,j,i,n)])!CO2 sequestration
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_negative_emissions(y,s,t,j,i,n))
+					
+					] !negative emissions from BECCS
+					
+					=
+					
+					TOTAL_CO2_LIMITS(y)
+				}
+			}
+			Constraint Total_CO2_Emission_constraint_Nordic {
+				IndexDomain: (y)|ord(y)=card(y);
+				Property: ShadowPrice;
+				Definition: {
+					sum[n|n="Nordic" or n="Nordic_Buildings" or n="Nordic_Industry" or n="Nordic_Trans_Cars" or n="Nordic_Trans_HGV" or n="Nordic_Trans_Public" or n="Nordic_Trans_Oth",
+					
+					+sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_emissions_non_neutral(y,s,t,j,i,n)) !CO2 emissions ENDOGENOUS
+					
+					+IND_CO2_EMISSIONS(y,n) !CO2e emissions IND EXOGENOUS
+					
+					+AGR_EXOG_CO2_EMISSIONS(y,n) !CO2e emissions AGR EXOG FUELS
+					
+					+TRANS_OTH_CO2_EMISSIONS(y,n)!CO2 emissions in other transport sector
+					
+					+NON_CO2_EMISSIONS(y,n)! non-CO2 emissions
+					
+					+LULUCF_CO2_EMISSIONS(y,n) !LULUCF
+					
+					+sum((nn,i,s,t)|ENERGY_TYPE(i)=11, CLUSTER_WEIGHTS(s)*[f_crossborder(nn,n,i,y,s,t)-f_crossborder(n,nn,i,y,s,t)])! net import of CO2
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*[c_charge_CO2_nonneutral(y,s,t,j,i,n)])!CO2 sequestration
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_negative_emissions(y,s,t,j,i,n))!negative emissions from BECCS
+					
+					] 
+					
+					=
+					
+					TOTAL_CO2_LIMITS(y)
+				}
+			}
+			Constraint Total_CO2_Emission_constraint_EastEurope {
+				IndexDomain: (y)|ord(y)=card(y);
+				Property: ShadowPrice;
+				Definition: {
+					sum[n|n="EastEurope" or n="EastEurope_Buildings" or n="EastEurope_Industry" or n="EastEurope_Trans_Cars" or n="EastEurope_Trans_HGV" or n="EastEurope_Trans_Public" or n="EastEurope_Trans_Oth",
+					
+					+sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_emissions_non_neutral(y,s,t,j,i,n)) !CO2 emissions ENDOGENOUS
+					
+					+IND_CO2_EMISSIONS(y,n) !CO2e emissions IND EXOGENOUS
+					
+					+AGR_EXOG_CO2_EMISSIONS(y,n) !CO2e emissions AGR EXOG FUELS
+					
+					+TRANS_OTH_CO2_EMISSIONS(y,n)!CO2 emissions in other transport sector
+					
+					+NON_CO2_EMISSIONS(y,n)! non-CO2 emissions
+					
+					+LULUCF_CO2_EMISSIONS(y,n) !LULUCF
+					
+					+sum((nn,i,s,t)|ENERGY_TYPE(i)=11, CLUSTER_WEIGHTS(s)*[f_crossborder(nn,n,i,y,s,t)-f_crossborder(n,nn,i,y,s,t)])! net import of CO2
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*[c_charge_CO2_nonneutral(y,s,t,j,i,n)])!CO2 sequestration
+					
+					-sum((s,t,j,i),CLUSTER_WEIGHTS(s)*e_CO2_negative_emissions(y,s,t,j,i,n))!negative emissions from BECCS
+					
+					] 
+					
+					=
+					
+					TOTAL_CO2_LIMITS(y)
+				}
+			}
+			Constraint EV_constraint {
+				IndexDomain: {
+					(y,j,i,n)|ord(y)=card(y) and j="EV_Cars" and TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1
+										or ord(y)=card(y) and j="EV_PublicTrans" and TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1
+										or ord(y)=card(y) and j="EV_HGV" and TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1
+				}
+				Definition: [ConverstionCapacity(j,i,n)+ks_EV(j,i,n,y)]<=EV_UB(j,i,n,y);
+			}
+		}
+		DeclarationSection EU_level_constraints {
+			Constraint TotalPrimarySupply {
+				IndexDomain: (y,i,n)|PRIMARY_SUPPLY(n,i)>0;
+				Property: ShadowPrice;
+				Definition: sum((s,t),CLUSTER_WEIGHTS(s)*s_primary_supply(y,s,t,i,n))<=PRIMARY_SUPPLY(n,i);
+			}
+			Constraint OnshoreWind_constraint {
+				IndexDomain: (y)|ord(y)=card(y) and OnshoreWind_UB(y)<>10000;
+				Definition: sum((j,i,n)|j="Wind_Onshore",[ConverstionCapacity(j,i,n)+kg(j,i,n,y)])<=OnshoreWind_UB(y);
+			}
+			Constraint OffshoreWind_constraint {
+				IndexDomain: (y)|ord(y)=card(y) and OffshoreWind_UB(y)<>10000;
+				Definition: sum((j,i,n)|j="Wind_Offshore",[ConverstionCapacity(j,i,n)+kg(j,i,n,y)])<=OffshoreWind_UB(y);
+			}
+			Constraint BiomassCCS_constraint {
+				IndexDomain: (y)|ord(y)=card(y) and BiomassCCS_UB(y)<>10000;
+				Definition: sum((j,i,n)|j="ST_Biomass_CCS",[ConverstionCapacity(j,i,n)+kg(j,i,n,y)])<=BiomassCCS_UB(y);
+			}
+			Constraint HydroRoR_constraint {
+				IndexDomain: (y)|ord(y)=card(y);
+				Definition: sum((j,i,n)|j="Hydro_RoR",[ConverstionCapacity(j,i,n)+kg(j,i,n,y)])<=Hydro_RoR_UB(y);
+			}
+			Constraint Geothermal_constraint {
+				IndexDomain: (y)|ord(y)=card(y);
+				Definition: sum((j,i,n)|j="Geothermal",[ConverstionCapacity(j,i,n)+kg(j,i,n,y)])<=Geothermal_UB(y);
+			}
+			Constraint Battery_StorCapacity_UB {
+				IndexDomain: (y)|ord(y)=card(y);
+				Definition: sum((j,n)|BATTERIES_STORAGE_KEY(j)=1,StorageCapacity(j,n))+sum((j,i,n)|BATTERIES_STORAGE_KEY(j)=1,ks(j,i,n,y))<=Battery_StorCapacity_Limit(y);
+			}
+			Constraint HydroP_StorCapacity_UB {
+				IndexDomain: (y)|ord(y)=card(y);
+				Definition: sum((j,n)|HP_STORAGE_KEY(j)=1,StorageCapacity(j,n))+sum((j,i,n)|HP_STORAGE_KEY(j)=1,ks(j,i,n,y))<=HydroP_StorCapacity_Limit(y);
+			}
+		}
+		DeclarationSection MathProgramme {
+			MathematicalProgram EFOM_MINIMIZATION {
+				Objective: OBJECTIVE_FUNCTION;
+				Direction: minimize;
+				Constraints: AllConstraints;
+				Variables: AllVariables;
+				Type: Automatic;
+			}
+			Variable OBJECTIVE_FUNCTION {
+				Range: free;
+				Definition: {
+					v_opex_commodity+
+						v_opex_network_x+
+							v_opex_network_n+
+								v_opex_conversion+
+									v_opex_storage+
+										v_opex_carbon+
+											v_opex_vre_curtail+
+												v_capex_networks+
+													v_capex_conversion+
+														v_capex_storage
+				}
+			}
+		}
+	}
+	Section MODELLING_PROCEDURES {
+		DeclarationSection CLUSTERING_AND_TIME_SEQUENCE {
+			Parameter TIMESEQUENCE_MATRIX {
+				IndexDomain: (d,s);
+			}
+			Parameter DAY_TYPE_ORDER {
+				IndexDomain: (s,ss);
+			}
+			Parameter CLUSTER_WEIGHTS {
+				IndexDomain: s;
+				Definition: sum(d,TIMESEQUENCE_MATRIX(d,s));
+			}
+		}
+	}
+	Section MODEL_DATA_INPUT {
+		DeclarationSection EXCEL_LINK_GENERAL {
+			StringParameter ExcelDataIN_GENERAL_INPUTS {
+				Definition: "DATA IN/15 TECH BASELINE/GENERAL_INPUTS.xlsx";
+			}
+			StringParameter ExcelDataIN_ANNUAL_DEMAND {
+				Definition: "DATA IN/15 TECH BASELINE/DEMAND INPUT/ANNUAL_DEMAND.xlsx";
+			}
+			StringParameter ExcelDataIN_DEMAND_PROFILES {
+				Definition: "DATA IN/15 TECH BASELINE/DEMAND INPUT/DEMANDPROFILES.xlsx";
+			}
+			StringParameter ExcelDataIN_CONVERSION {
+				Definition: "DATA IN/15 TECH BASELINE/SUPPLY INPUT/INPUT_DATA_CONVERSION.xlsx";
+			}
+			StringParameter ExcelDataIN_CF_VRE {
+				Definition: "DATA IN/15 TECH BASELINE/SUPPLY INPUT/CF_VRE.xlsx";
+			}
+			StringParameter ExcelDataIN_STORAGE {
+				Definition: "DATA IN/15 TECH BASELINE/SUPPLY INPUT/INPUT_DATA_STORAGE.xlsx";
+			}
+			StringParameter ExcelDataIN_NETWORKS {
+				Definition: "DATA IN/15 TECH BASELINE/NETWORKS INPUT/NETWORKS.xlsx";
+			}
+			StringParameter ExcelDataIN_SYSTEM_COSTS {
+				Definition: "DATA IN/15 TECH BASELINE/COSTS INPUT/SYSTEM_COSTS.xlsx";
+			}
+			StringParameter ExcelDataIN_TIME_SEQUENCE {
+				Definition: "DATA IN/15 TECH BASELINE/DEMAND INPUT/TIME_SEQUENCE.xlsx";
+			}
+			StringParameter ExcelDataIN_BOUNDS {
+				Definition: "DATA IN/15 TECH BASELINE/SUPPLY INPUT/INPUT_DATA_BOUNDS.xlsx";
+			}
+			Parameter ExcelStatus;
+			StringParameter ExcelErrorMessage;
+		}
+		Procedure CheckExcelError {
+			Body: {
+				if not ExcelStatus then
+				        if CurrentErrorMessage then
+				                ExcelErrorMessage := FormatString("Function failed with error %s",CurrentErrorMessage);
+				        else
+				                ExcelErrorMessage := FormatString("Function failed without an error message");
+				        endif;
+				
+				        DialogError(ExcelErrorMessage);
+				        empty CurrentErrorMessage;
+					ExcelCloseWorkbook(ExcelDataIN_CONVERSION, 0);
+				        halt;
+				endif;
+			}
+		}
+		Procedure GetData_GENERAL {
+			Body: {
+				!DEFINE SETS - TIME
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "SET");
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, Years, "Years",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, Calendar_Days, "Calendar_Days",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, Day_Types, "Day_Types",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, Hours, "Hours",);
+				CheckExcelError;
+				
+				!DEFINE SETS - ENERGY TECHNOLOGIES
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "SET");
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, Nodes, "Nodes",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, Sectors, "Sectors",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, EnergyCommodity, "EnergyCommodity",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveSet(ExcelDataIN_GENERAL_INPUTS, ConversionTech, "ConversionTech",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, TECH_TYPE(j), "TECH_TYPE",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, POWERGEN_TECH_TYPE(j), "POWERGEN_TECH_TYPE",);
+				CheckExcelError;
+				
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, VRE_TECH(j), "VRE_TECH",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, NODE_TYPE(n), "NODE_TYPE",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, FINAL_DEMAND_NODE(n), "FINAL_DEMAND_NODE");
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, ENERGY_TYPE(i), "ENERGY_TYPE",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, PRIM_SUPPLY(i), "PRIM_SUPPLY",);
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveParameter(ExcelDataIN_GENERAL_INPUTS, STORAGE_KEY(j), "STORAGE_KEY",);
+				CheckExcelError;
+				
+				!DEFINE MAPPINGS FOR NODES AND TECHNOLOGIES
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "M_TECH_INPUT_MAP(j,i)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_GENERAL_INPUTS, TECH_INPUT_MAP(j,i), "M_TECH_INPUT_MAP", "j", "i");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "M_TECH_INPUT_MAP_REDUCED(j,i)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_GENERAL_INPUTS, TECH_INPUT_MAP_REDUCED(j,i), "M_TECH_INPUT_MAP_REDUCED", "j", "i");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "M_TECH_OUTPUT_MAP(j,i)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_GENERAL_INPUTS, TECH_OUTPUT_MAP(j,i), "M_TECH_OUTPUT_MAP", "j", "i");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "M_TECH_LOCATION_MAP(j,n)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_GENERAL_INPUTS, TECH_LOCATION_MAP(j,n), "M_LOCATION_MAP", "j", "n");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "NETWORK_FLOW_TYPE(i,ii)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_GENERAL_INPUTS, NETWORK_FLOW_TYPE(i,ii), "NETWORK_FLOW_TYPE","i", "ii");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "INPUT_MAPPING(i,ii)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_GENERAL_INPUTS, INPUT_MAPPING(i,ii), "INPUT_MAPPING","iii");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_GENERAL_INPUTS, "CountryMapping(n,nn)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_GENERAL_INPUTS, CountryMapping(n,nn), "CountryMapping","nnn");
+				CheckExcelError;
+				ExcelCloseWorkbook(ExcelDataIN_GENERAL_INPUTS,0);
+				
+				!TIME DEFINTION
+				ExcelSetActiveSheet(ExcelDataIN_TIME_SEQUENCE, "data");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_TIME_SEQUENCE, TIMESEQUENCE_MATRIX(d,s), "TIMESEQUENCE_MATRIX", "d", "s");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_TIME_SEQUENCE, "day_type_order");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_TIME_SEQUENCE, DAY_TYPE_ORDER(s,ss), "DAY_TYPE_ORDER", "s", "ss");
+				CheckExcelError;
+				ExcelCloseWorkbook(ExcelDataIN_TIME_SEQUENCE,0);
+			}
+		}
+		Procedure GetData_NETWORK {
+			Body: {
+				!DEFINE NETWORK TOPOLOGY & CAPACITIES/LOSSES
+				ExcelSetActiveSheet(ExcelDataIN_NETWORKS, "NODE_TO_NODE");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_NETWORKS, NetworkMap(n,nn), "NODE_TO_NODE", "nnn",);
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_NETWORKS, "NodeToNode_Parameters(n,nn,ii)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_NETWORKS, NetworkCapacity(n,nn,ii), "NodeToNode_Capacity", "nnnii",);
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_NETWORKS, "NodeToNode_Parameters(n,nn,ii)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_NETWORKS, NetworkLosses(n,nn,i), "NodeToNode_Losses", "nnnii",);
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_NETWORKS, "Node_Parameters(n,ii)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_NETWORKS, NodeCapacity(n,ii), "NodeCapacity", "nii",);
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_NETWORKS, "Node_Parameters(n,ii)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_NETWORKS, NodeLosses(n,ii), "NodeLosses", "nii",);
+				CheckExcelError;
+				
+				!ExcelSetActiveSheet(ExcelDataIN_NETWORKS, "CommFlowMap(n,nn,i)");
+				!ExcelStatus := ExcelRetrieveTable(ExcelDataIN_NETWORKS, CommFlowMap(n,nn,i), "CommFlowMap", "nnn", "i",);
+				!CheckExcelError;
+				
+				ExcelCloseWorkbook(ExcelDataIN_NETWORKS,0);
+			}
+		}
+		Procedure GetData_DEMAND {
+			Body: {
+				!GET ANNUAL DEMAND FOR ALL COUNTRIES/REGIONS
+				ExcelSetActiveSheet(ExcelDataIN_ANNUAL_DEMAND, "All");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_ANNUAL_DEMAND, ANNUAL_DEMAND(m,i,y), "ANNUAL_DEMAND", "mi", "y");
+				CheckExcelError;
+				ExcelCloseWorkbook(ExcelDataIN_ANNUAL_DEMAND,0);
+				
+				!GET HOURLY DEMAND PROFILES FOR ALL COUNTRIES/REGIONS
+				ExcelSetActiveSheet(ExcelDataIN_DEMAND_PROFILES, "DEMAND_PROFILES");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_DEMAND_PROFILES, DEMAND_PROFILES(s,t,m), "DEMAND_PROFILES", "st", "m");
+				CheckExcelError;
+				ExcelSetActiveSheet(ExcelDataIN_DEMAND_PROFILES, "AMB_TEMP");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_DEMAND_PROFILES, AMB_TEMP(s,t,n), "AMB_TEMP", "st", "n");
+				CheckExcelError;
+				!GET SHARES OF CO2 EXOGENOUS EMISSIONS
+				ExcelSetActiveSheet(ExcelDataIN_DEMAND_PROFILES, "CO2_SHARES");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_DEMAND_PROFILES, SHARE_AGR_NON_CO2_EMISSIONS(n), "SHARE_AGR_NON_CO2_EMISSIONS", "n");
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_DEMAND_PROFILES, SHARE_IND_NON_CO2_EMISSIONS(n), "SHARE_IND_NON_CO2_EMISSIONS", "n");
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_DEMAND_PROFILES, SHARE_LULUCF_EMISSIONS(n), "SHARE_LULUCF_EMISSIONS", "n");
+				CheckExcelError;
+				ExcelCloseWorkbook(ExcelDataIN_DEMAND_PROFILES,0);
+			}
+		}
+		Procedure Copy_GetData_DEMAND {
+			Body: {
+				!GET ANNUAL DEMAND FOR ALL COUNTRIES/REGIONS
+				ExcelSetActiveSheet(ExcelDataIN_ANNUAL_DEMAND, "All");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_ANNUAL_DEMAND, ANNUAL_DEMAND(m,i,y), "ANNUAL_DEMAND", "mi", "y");
+				CheckExcelError;
+				ExcelCloseWorkbook(ExcelDataIN_ANNUAL_DEMAND,0);
+			}
+		}
+		Procedure GetData_CONVERSION {
+			Body: {
+				!GET CONVERSION TECH PARAMETERS
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "CONVERSION_CAPACITY(j,i,n)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, ConverstionCapacity(j,i,n), "CONVERSION_CAPACITY", "jin");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "ETA_INPUT_FACTOR(j,i)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, ETA_InputFactor(j,i), "ETA_INPUT_FACTOR", "ji");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "CO2_INTENSITY(i)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, CO2_INTENSITY(i), "CO2_INTENSITY", "i");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "Trans_Travel_Mileage(j)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, Trans_Travel_Mileage(j), "Trans_Travel_Mileage", "j");
+				CheckExcelError;
+				
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "CO2_INTENSITY(i)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, CO2_NeutralCommodity(i), "CO2_NeutralCommodity", "i");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "CO2_CaptureRate(j,i)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, CO2_CaptureRate(j,i), "CO2_CaptureRate", "ji");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "CF(j)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, CapacityFactor(j), "CF", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "RUF(j)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, RampUpFactor(j), "RUF", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "PL(j)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, ParaLoad(j), "PL", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_CONVERSION, "ConversionLifetime(j)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CONVERSION, ConversionLifetime(j), "ConversionLifetime", "j");
+				CheckExcelError;
+				
+				ExcelCloseWorkbook(ExcelDataIN_CONVERSION,0);
+			}
+		}
+		Procedure GetData_CF_VRE {
+			Body: {
+				!GET CONVERSION TECH PARAMETERS
+				ExcelSetActiveSheet(ExcelDataIN_CF_VRE, "CF_VRE(s,t,j,n)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_CF_VRE, CapacityFactor_VRE(s,t,j,n), "CF_VRE", "st", "jn");
+				CheckExcelError;
+				
+				ExcelCloseWorkbook(ExcelDataIN_CF_VRE,0);
+			}
+		}
+		Procedure GetData_STORAGE {
+			Body: {
+				!GET STORAGE TECH PARAMETERS
+				ExcelSetActiveSheet(ExcelDataIN_STORAGE, "STORAGE_CAPACITY(j,n)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_STORAGE, StorageCapacity(j,n), "STORAGE_CAPACITY", "jn");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_STORAGE, "STORAGE_PARAMETERS");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_STORAGE, StorageEfficiency(j), "StorageEfficiency", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_STORAGE, "STORAGE_PARAMETERS");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_STORAGE, StorageDuration_Charge(j), "StorageDuration_Charge", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_STORAGE, "STORAGE_PARAMETERS");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_STORAGE, StorageDuration_Discharge(j), "StorageDuration_Discharge", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_STORAGE, "STORAGE_PARAMETERS");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_STORAGE, StorageLifetime(j), "StorageLifetime", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_STORAGE, "STORAGE_PARAMETERS");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_STORAGE, EV_Batt_Cap(j), "EV_Batt_Cap", "j");
+				CheckExcelError;
+				
+				ExcelCloseWorkbook(ExcelDataIN_STORAGE,0);
+			}
+		}
+		Procedure GetData_SYSTEMCOSTS {
+			Body: {
+				!GET COSTS PARAMETERS
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "ConvStor_OPEX");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, VOM_technology(j), "VOM_technology", "j");
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, FOM_technology(j), "FOM_technology", "j");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "CrossBorder_OPEX");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, CrossBorderNetwork_VOM(n,nn,ii), "CrossBorderNetwork_VOM", "nnnii");
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, CrossBorderNetwork_FOM(n,nn,ii), "CrossBorderNetwork_FOM", "nnnii");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "NationalNetwork_OPEX");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, NationalNetwork_VOM(n,ii), "NationalNetwork_VOM", "nii");
+				CheckExcelError;
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, NationalNetwork_FOM(n,ii), "NationalNetwork_FOM", "nii");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "CommodityCost");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, CommodityCost(n,i), "CommodityCost", "n", "i");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "VOLL");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, VoLL(i,n), "VoLL", "in");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "VRECurtailCost");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, VRECurtailCost(j,n), "VRECurtailCost", "jn");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "CBFCapex");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, CrossBorderCapex(n,nn,i,y), "CrossBorderCapex", "nnni", "y");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "NFCapex");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, NationalNetworkCapex(n,i,y), "NationalNetworkCapex", "ni", "y");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_SYSTEM_COSTS, "ConvStorCapex");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_SYSTEM_COSTS, ConvStorCapex(j,y), "ConvStorCapex", "j", "y");
+				CheckExcelError;
+				
+				ExcelCloseWorkbook(ExcelDataIN_SYSTEM_COSTS,0);
+			}
+		}
+		Procedure GetData_BOUNDS {
+			Body: {
+				!GET POWERGEN & PRIMARY SUPPLY BOUNDS
+				
+				ExcelSetActiveSheet(ExcelDataIN_BOUNDS, "PowerGenCapacity_Limit");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_BOUNDS, PowerGenCapacity_Limit(n,j,y), "PowerGenCapacity_Limit", "nj", "y");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_BOUNDS, "PrimarySupply");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_BOUNDS, PRIMARY_SUPPLY(n,i), "PRIMARY_SUPPLY", "n", "i");
+				CheckExcelError;
+				
+				ExcelSetActiveSheet(ExcelDataIN_BOUNDS, "EV_UB(j,i,n,y)");
+				ExcelStatus := ExcelRetrieveTable(ExcelDataIN_BOUNDS, EV_UB(j,i,n,y), "EV_UB", "jiny");
+				CheckExcelError;
+				
+				
+				ExcelCloseWorkbook(ExcelDataIN_BOUNDS,0);
+			}
+		}
+	}
+	Section MODEL_RESULTS {
+		DeclarationSection EnergyBalance {
+			Parameter CountryMapping {
+				IndexDomain: (n,nn);
+			}
+			Parameter Ar_primary_supply {
+				IndexDomain: (n,i);
+				Definition: sum(nn, CountryMapping(n,nn)*sum((y,s,t),CLUSTER_WEIGHTS(s)*s_primary_supply(y,s,t,i,nn)*(1-NodeLosses(n,i))));
+			}
+			Parameter Ar_Export_flow {
+				IndexDomain: (n,i)|NODE_TYPE(n)=1;
+				Range: free;
+				Definition: -1*sum(nn,Ar_crossborder_flow(n,nn,i));
+			}
+			Parameter Ar_Import_flow {
+				IndexDomain: (n,i)|NODE_TYPE(n)=1;
+				Range: free;
+				Definition: sum(nn,Ar_crossborder_flow(nn,n,i)*(1-NetworkLosses(nn,n,i)));
+			}
+			Parameter Ar_StockChange {
+				IndexDomain: (n,j,i)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1;
+				Text: "Flow of commodity i from node/zone n to the next node/zone nn at time (y,t) - MWhth";
+				Range: free;
+				Definition: sum(nn,CountryMapping(n,nn)*[-1*Ar_charge(j,i,nn)+Ar_discharge(j,i,nn)]);
+			}
+			Parameter Ar_Transformation {
+				IndexDomain: (n,j,i);
+				Range: free;
+				Definition: {
+					sum(nn,CountryMapping(n,nn)*[-1*Ar_ConversionConsumption(j,i,nn)+Ar_conversion(j,i,nn)$(NODE_TYPE(nn)<=3 and TECH_TYPE(j)<>9 and TECH_TYPE(j)<>14)
+					
+					-1*Ar_conversion(j,i,nn)$(TECH_TYPE(j)=14)
+					
+					])
+				}
+			}
+			Parameter Ar_FinalConsumption {
+				IndexDomain: (n,i)|FINAL_DEMAND_NODE(n)=1 and ENERGY_TYPE(i)<=12 or FINAL_DEMAND_NODE(n)=1 and ENERGY_TYPE(i)=15;
+				Range: free;
+				Definition: sum((y,d,t),Hr_FinalConsumption(y,d,t,i,n));
+			}
+			Parameter Ar_NetworkLosses {
+				IndexDomain: (n,i)|COMMODITY_MAP(n,i)=1;
+				Range: free;
+				Definition: {
+					sum(nn,CountryMapping(n,nn)*[
+					
+					+sum((y,s,t,j),CLUSTER_WEIGHTS(s)*g_conversion.Level(y,s,t,j,i,nn)*(1-ParaLoad(j))*NodeLosses(nn,i))
+					
+					+sum((y,s,t),CLUSTER_WEIGHTS(s)*sum[nnn,f_crossborder(nnn,nn,i,y,s,t)*NetworkLosses(nnn,nn,i)])
+					
+					+sum((y,s,t),CLUSTER_WEIGHTS(s)*sum[nnn,f_crossborder(nnn,nn,i,y,s,t)*(1-NetworkLosses(nnn,nn,i))*NodeLosses(nn,i)])
+					
+					])
+					
+					+sum(nn,CountryMapping(n,nn)*[sum((y,s,t,j),CLUSTER_WEIGHTS(s)*d_discharge(y,s,t,j,i,nn)*NodeLosses(nn,i))
+					
+					+sum((y,s,t),CLUSTER_WEIGHTS(s)*s_primary_supply(y,s,t,i,nn)*NodeLosses(nn,i))])
+				}
+			}
+			Parameter Ar_PowerPlantsSelfCons {
+				IndexDomain: (n,i)|COMMODITY_MAP(n,i)=1;
+				Range: free;
+				Definition: sum(nn,CountryMapping(n,nn)*sum((y,s,t,j),(CLUSTER_WEIGHTS(s)*g_conversion.Level(y,s,t,j,i,nn)*ParaLoad(j))));
+			}
+		}
+		DeclarationSection CO2_emissions {
+			Parameter Hr_CO2_emissions_total {
+				IndexDomain: (y,d,t,j,i,n)|STORAGE_KEY(j)=0 and TECH_LOCATION_MAP(j,n)=1  and ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: {
+					sum((s),TIMESEQUENCE_MATRIX(d,s)*[e_CO2_emissions_non_neutral.Level(y,s,t,j,i,n)+e_CO2_emissions_neutral.Level(y,s,t,j,i,n)]) !total CO2 emissions endogenous
+				}
+			}
+			Parameter Hr_CO2_negative_emissions {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j="Underground_CO2_Stor";
+				Range: free;
+				Definition: {
+					sum(s,TIMESEQUENCE_MATRIX(d,s)*e_CO2_negative_emissions.Level(y,s,t,j,i,n)) !negative emissions from BiomassCCS
+				}
+			}
+			Parameter Hr_CO2_net_neutral_emissions {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: {
+					sum(s,TIMESEQUENCE_MATRIX(d,s)*e_CO2_emissions_neutral.Level(y,s,t,j,i,n))
+					-sum(s,TIMESEQUENCE_MATRIX(d,s)*x_consumption.Level(y,s,t,j,i,n))
+				}
+			}
+			Parameter Ar_CO2_emissions_non_final_demand {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and FINAL_DEMAND_NODE(n)=0;
+				Range: free;
+				Definition: sum((y,d,t),Hr_CO2_emissions_total(y,d,t,j,i,n));
+			}
+			Parameter Ar_CO2_emissions_final_demand {
+				IndexDomain: (n,i)|ENERGY_TYPE(i)=11 and FINAL_DEMAND_NODE(n)=1;
+				Range: free;
+				Definition: {
+					sum((y,d,t,j),Hr_CO2_emissions_total(y,d,t,j,i,n))
+					+sum(y,IND_CO2_EMISSIONS(y,n))
+					+sum(y,AGR_EXOG_CO2_EMISSIONS(y,n))
+					+sum(y,TRANS_OTH_CO2_EMISSIONS(y,n))
+				}
+			}
+			Parameter Ar_nonCO2_emissions {
+				IndexDomain: (n,i)|ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: +sum(y,sum(nn,CountryMapping(n,nn)*NON_CO2_EMISSIONS(y,nn)));
+			}
+			Parameter Ar_CO2_emissions_LULUCF {
+				IndexDomain: (n,i)|ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: +sum(y,sum(nn,CountryMapping(n,nn)*LULUCF_CO2_EMISSIONS(y,nn)));
+			}
+			Parameter Ar_CO2_emissions_total_endogenous {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: sum((y,d,t),Hr_CO2_emissions_total(y,d,t,j,i,n));
+			}
+			Parameter Ar_CO2_emissions_ALL {
+				IndexDomain: (n,i)|ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: sum((j),Ar_CO2_emissions_total_endogenous(j,i,n))+sum(y,IND_CO2_EMISSIONS(y,n))+sum(y,AGR_EXOG_CO2_EMISSIONS(y,n));
+			}
+			Parameter Ar_CO2_net_neutral_emissions {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: sum((y,d,t),Hr_CO2_net_neutral_emissions(y,d,t,j,i,n));
+			}
+			Parameter Ar_CO2_negative_emissions {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and  STORAGE_KEY(j)=1 and j="Underground_CO2_Stor";
+				Range: free;
+				Definition: sum((y,d,t),Hr_CO2_negative_emissions(y,d,t,j,i,n));
+			}
+			Parameter Ar_CO2_CaptureStorage {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)=1 and j="Underground_CO2_Stor" and ENERGY_TYPE(i)=11;
+				Range: free;
+				Definition: {
+					sum((y,s,t,d),TIMESEQUENCE_MATRIX(d,s)*[c_charge_CO2_nonneutral.Level(y,s,t,j,i,n)+c_charge_CO2_neutral.Level(y,s,t,j,i,n)])!CO2 sequestration
+				}
+			}
+		}
+		DeclarationSection Capacity_Investment {
+			Parameter Ar_NetworkCapacityCB {
+				IndexDomain: (n,nn,i)|CX_NetworkMap(n,nn,i)=1 and NODE_TYPE(n)<=2 and NODE_TYPE(nn)<=2;
+				Range: free;
+				Definition: sum(y,NetworkCapacity(n,nn,i)*(1-NetworkDepreciationRate)^(ord(y))+kf_crossborder.Level(n,nn,i,y));
+			}
+			Parameter Ar_NetworkCapacityN {
+				IndexDomain: (n,i)|COMMODITY_MAP(n,i)=1 and sum(ii,NETWORK_FLOW_TYPE(ii,i))>0 and NODE_TYPE(n)<>2;
+				Range: free;
+				Definition: sum(y,NodeCapacity(n,i)*(1-NodeDepreciation)^(ord(y))+kf_national.Level(n,i,y));
+			}
+			Parameter Ar_ConversionCapacity {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=0;
+				Range: free;
+				Definition: sum(y,[ConverstionCapacity(j,i,n)*(1-ConversionDepreciation(j))^(ord(y))+kg.Level(j,i,n,y)]);
+			}
+			Parameter Ar_StorageCapacity {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and EV_CONVERSION_KEY(j)=0;
+				Range: free;
+				Definition: sum(y,[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks.Level(j,i,n,y)]);
+			}
+			Parameter Ar_StorageEVCapacity {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and EV_CONVERSION_KEY(j)=1;
+				Range: free;
+				Definition: sum(y,[StorageCapacity(j,n)*(1-StorageDepreciation(j))^(ord(y))+ks_EV.Level(j,i,n,y)]);
+			}
+		}
+		DeclarationSection Dispatch {
+			Parameter Hr_s_primary_supply {
+				IndexDomain: {
+					(y,d,t,i,n)|COMMODITY_MAP(n,i)=1 and NODE_TYPE(n)=1 and PRIM_SUPPLY(i)=1 or COMMODITY_MAP(n,i)=1 and node_type(n)>=5 and i="Diesel" 
+					or COMMODITY_MAP(n,i)=1 and node_type(n)>=5 and i="Gasoline"
+				}
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*s_primary_supply(y,s,t,i,n));
+			}
+			Parameter Hr_conversion {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0;
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*[g_conversion.Level(y,s,t,j,i,n)]);
+			}
+			Parameter Hr_EV_conversion {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=1;
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*g_EV_conversion.Level(y,s,t,j,i,n));
+			}
+			Parameter Hr_CO2_Capture {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n) and STORAGE_KEY(j)=0 and ENERGY_TYPE(i)=11 and CO2_CaptureRate(j,i)<>0;
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*z_CO2_Capture_nonneutral.Level(y,s,t,j,i,n));
+			}
+			Parameter Hr_discharge {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and j<>"Underground_CO2_Stor";
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*[d_discharge(y,s,t,j,i,n)+d_dischargeEV(y,s,t,j,i,n)]);
+			}
+			Parameter Hr_charge {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1;
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*StorageEfficiency(j)*[c_charge(y,s,t,j,i,n)+c_charge_CO2_nonneutral(y,s,t,j,i,n)]);
+			}
+			Parameter Hr_storage_level {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1;
+				Range: free;
+				Definition: {
+					if sum(s,TIMESEQUENCE_MATRIX(d,s)*storage_level_intra.Level(y,s,t,j,i,n))<0 or storage_level_inter(y,d,j,i,n)<0 then 0 
+					
+					else sum(s,TIMESEQUENCE_MATRIX(d,s)*storage_level_intra.Level(y,s,t,j,i,n))+storage_level_inter(y,d,j,i,n) endif;
+				}
+			}
+			Parameter Hr_VRE_curtailment {
+				IndexDomain: (y,d,t,j,i,n)|VRE_TECH(j)=1 and TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1;
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*vre_curtail.Level(y,s,t,j,i,n));
+			}
+			Parameter Hr_crossborder_flow {
+				IndexDomain: (n,nn,i,y,d,t)|CommFlowMap(n,nn,i)=1;
+				Range: free;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*f_crossborder.Level(n,nn,i,y,s,t));
+			}
+			Parameter Hr_wind_offshore {
+				IndexDomain: (y,s,t);
+				Definition: sum((j,i,n)|j="Wind_Offshore",g_conversion(y,s,t,j,i,n));
+			}
+			Parameter Hr_wind_onshore {
+				IndexDomain: (y,s,t);
+				Definition: sum((j,i,n)|j="Wind_Onshore",g_conversion(y,s,t,j,i,n));
+			}
+			Parameter Hr_solar {
+				IndexDomain: (y,s,t);
+				Definition: 0.00000001$(sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3,g_conversion(y,s,t,j,i,n))=0)+sum((j,i,n)|POWERGEN_TECH_TYPE(j)=3,g_conversion(y,s,t,j,i,n));
+			}
+			Parameter Hr_H2_Electrolysis {
+				IndexDomain: (y,s,t);
+				Definition: sum((j,i,n)|j="Electrolysis_Alkaline" or j="Electrolysis_PEM" or j="Electrolysis_SOEC",g_conversion(y,s,t,j,i,n));
+			}
+			Parameter Hr_H2_NG_Reformation {
+				IndexDomain: (y,s,t);
+				Definition: sum((j,i,n)|j="NG_ATR_CCS" or j="NG_SMR_CCS",g_conversion(y,s,t,j,i,n));
+			}
+			Parameter Hr_VRE_total_curtailment {
+				IndexDomain: (y,s,t);
+				Definition: 0.0000001$[sum((j,i,n),vre_curtail.Level(y,s,t,j,i,n))=0]+[sum((j,i,n),vre_curtail.Level(y,s,t,j,i,n))];
+			}
+			Parameter Ar_conversion {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and EV_CONVERSION_KEY(j)=0 and NODE_TYPE(n)<>2;
+				Range: free;
+				Definition: sum((y,d,t),Hr_conversion(y,d,t,j,i,n));
+			}
+			Parameter Ar_EV_conversion {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and ENERGY_TYPE(i)<>11 and EV_CONVERSION_KEY(j)=1;
+				Range: free;
+				Definition: sum((y,d,t),Hr_EV_conversion(y,d,t,j,i,n));
+			}
+			Parameter Ar_crossborder_flow {
+				IndexDomain: (n,nn,i)|CommFlowMap(n,nn,i)=1 and FINAL_DEMAND_NODE(nn)=0 and FINAL_DEMAND_NODE(n)=0;
+				Text: "Flow of commodity i from node/zone n to the next node/zone nn at time (y,t) - MWhth";
+				Range: free;
+				Definition: sum((y,d,t),Hr_crossborder_flow(n,nn,i,y,d,t));
+			}
+			Parameter Ar_charge {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1;
+				Range: free;
+				Definition: sum((y,d,t),Hr_charge(y,d,t,j,i,n));
+			}
+			Parameter Ar_discharge {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1;
+				Range: free;
+				Definition: sum((y,d,t),Hr_discharge(y,d,t,j,i,n));
+			}
+			Parameter Ar_EV_discharge_to_grid {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=1 and EV_CONVERSION_KEY(j)=1;
+				Range: free;
+				Definition: sum((y,d,t), sum(s,TIMESEQUENCE_MATRIX(d,s)*[d_discharge(y,s,t,j,i,n)]));
+			}
+			Parameter Ar_VRE_curtailment {
+				IndexDomain: (j,i,n)|VRE_TECH(j)=1 and TECH_LOCATION_MAP(j,n)*TECH_OUTPUT_MAP(j,i)=1;
+				Range: free;
+				Definition: sum((y,d,t),Hr_VRE_curtailment(y,d,t,j,i,n));
+			}
+		}
+		DeclarationSection Consumption {
+			Parameter Hr_ConversionConsumption {
+				IndexDomain: (y,d,t,j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and VRE_TECH(j)=0;
+				Range: free;
+				Definition: sum((s),TIMESEQUENCE_MATRIX(d,s)*x_consumption(y,s,t,j,i,n));
+			}
+			Parameter Hr_FinalConsumption {
+				IndexDomain: (y,d,t,i,n)|FINAL_DEMAND_NODE(n)=1 and ENERGY_TYPE(i)<=12 and COMMODITY_MAP(n,i)=1 or FINAL_DEMAND_NODE(n)=1 and ENERGY_TYPE(i)=15 and COMMODITY_MAP(n,i)=1;
+				Range: free;
+				Definition: {
+					sum((s,j),TIMESEQUENCE_MATRIX(d,s)*g_conversion(y,s,t,j,i,n)*(1-ParaLoad(j))*(1-NodeLosses(n,i)))!solar residential
+					
+					+sum[s,TIMESEQUENCE_MATRIX(d,s)*sum(nn,f_crossborder(nn,n,i,y,s,t)*(1-NetworkLosses(nn,n,i))*(1-NodeLosses(n,i)))]!import from NTS
+					
+					+sum[s,TIMESEQUENCE_MATRIX(d,s)*s_primary_supply(y,s,t,i,n)*(1-NodeLosses(n,i))]!direct supply primary
+					
+					-sum[s,TIMESEQUENCE_MATRIX(d,s)*sum(nn,f_crossborder(n,nn,i,y,s,t))]!export to NTS
+				}
+			}
+			Parameter Hr_EV_Consumption {
+				IndexDomain: (y,d,t,j,i,n)|EV_CONVERSION_KEY(j)=1;
+				Definition: sum(s,TIMESEQUENCE_MATRIX(d,s)*[c_charge(y,s,t,j,i,n)-d_discharge(y,s,t,j,i,n)]);
+			}
+			Parameter Ar_ConversionConsumption {
+				IndexDomain: (j,i,n)|TECH_LOCATION_MAP(j,n)*TECH_INPUT_MAP(j,i)=1 and STORAGE_KEY(j)=0 and VRE_TECH(j)=0 and FINAL_DEMAND_NODE(n)=0;
+				Range: free;
+				Definition: sum((y,d,t),Hr_ConversionConsumption(y,d,t,j,i,n));
+			}
+			Parameter Ar_EV_Consumption {
+				IndexDomain: (j,i,n)|EV_CONVERSION_KEY(j)=1;
+				Definition: sum((y,d,t),Hr_EV_Consumption(y,d,t,j,i,n));
+			}
+		}
+	}
+	Procedure IMPORT_DATASET {
+		Body: {
+			RUN GetData_GENERAL; GetData_NETWORK; GetData_DEMAND;GetData_CONVERSION;GetData_CF_VRE;GetData_STORAGE;GetData_SYSTEMCOSTS;GetData_BOUNDS;
+		}
+	}
+	Procedure SOLVE_MODEL {
+		Body: {
+			SOLVE EFOM_MINIMIZATION;
+		}
+	}
+	Procedure MainInitialization {
+		Comment: "Add initialization statements here that do NOT require any library being initialized already.";
+	}
+	Procedure PostMainInitialization {
+		Comment: {
+			"			\"Add initialization statements here that require that the libraries are already initialized properly,
+						or add statements that require the Data Management module to be initialized.\""
+		}
+	}
+	Procedure MainExecution {
+		Body: {
+			run SOLVE_MODEL;
+		}
+	}
+	Procedure PreMainTermination {
+		Body: {
+			return DataManagementExit();
+		}
+		Comment: {
+			"			\"Add termination statements here that require all libraries to be still alive.
+						Return 1 if you allow the termination sequence to continue.
+						Return 0 if you want to cancel the termination sequence.\""
+		}
+	}
+	Procedure MainTermination {
+		Body: {
+			return 1;
+		}
+		Comment: {
+			"			\"Add termination statements here that do not require all libraries to be still alive.
+						Return 1 to allow the termination sequence to continue.
+						Return 0 if you want to cancel the termination sequence.
+						It is recommended to only use the procedure PreMainTermination to cancel the termination sequence and let this procedure always return 1.\""
+		}
+	}
+}

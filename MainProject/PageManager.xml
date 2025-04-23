@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+<PageManager>
+	<Page Name="All Data Pages" PageGUID="F4842FED-AD42-4824-8ECF-9E0E4B054B9C">
+		<Page Name="[Data Page] NODE_TO_NODE_POSSIBILITY" PageGUID="96F3600A-40CE-4911-8FB9-AA4F81151C47" />
+		<Page Name="[Data Page] M_COMMODITY_MAP" PageGUID="F4BB74B9-CEC3-4CD1-8D67-666EA6A8115C" />
+		<Page Name="[Data Page] M_TECHNOLOGY_MAP" PageGUID="2CF435CA-B514-4801-BD7F-7267C78EA32D" />
+		<Page Name="[Data Page] M_LOCATION_MAP" PageGUID="573D27CF-A96B-4490-A14C-54D14AB84CFE" />
+		<Page Name="[Data Page] CARBON_COST" PageGUID="3D942B6B-382C-478B-B1CF-A3C909C7A5D9" Marked="true" />
+		<Page Name="[Data Page] NODE_TO_NODE_COMMODITY" PageGUID="8D140C2A-0268-440A-9E96-DC61634B1411" />
+		<Page Name="[Data Page] test" PageGUID="13DC9F9C-896A-4153-A02A-8EA7609AB32C" Marked="true" />
+		<Page Name="[Data Page] NODE_TO_NODE" PageGUID="525CCE24-F91F-429C-B557-47C5587A3BA7" />
+		<Page Name="[Data Page] ANNUAL_DEMAND" PageGUID="32C0E125-3639-48EF-8086-A086D479B1DD" />
+		<Page Name="[Data Page] CONVERSION_CAPACITY" PageGUID="332C4979-6D87-4D4B-9DE5-457824C669B7" />
+		<Page Name="[Data Page] M_TECH_OUTPUT_MAP" PageGUID="4C6B477A-7166-4525-8910-479458501ADB" />
+		<Page Name="[Data Page] M_COMMODITY_MAP_SECTORS" PageGUID="E065FDBF-FA32-4B6A-9B99-A2F97592F7A1" Marked="true" />
+		<Page Name="[Data Page] M_TECH_INPUT_MAP" PageGUID="0628DAB3-6DF7-45F5-A6C6-D27526CB28A6" />
+		<Page Name="[Data Page] ETA_OUTPUT_FACTOR" PageGUID="ECE38774-728F-403D-B447-C05F80912810" Marked="true" />
+		<Page Name="[Data Page] ETA_INPUT_FACTOR" PageGUID="D37EBF32-98EE-49CF-9225-ED2359A62EF3" />
+		<Page Name="[Data Page] CF" PageGUID="276BE079-4AF5-4DBC-848F-FA84611B32C1" />
+		<Page Name="[Data Page] CF_VRE" PageGUID="EA603525-2CCD-4AA6-AA7B-F10BF4C7F56B" />
+		<Page Name="[Data Page] RUF" PageGUID="4946C350-9FFD-4A00-A4E9-895938D57DBE" />
+		<Page Name="[Data Page] tests" PageGUID="EC922F74-89F5-4574-BDF0-AA9D8BCDCFAC" Marked="true" />
+		<Page Name="[Data Page] eta" PageGUID="9C033F65-7759-416D-942B-FB5BA0E35205" Marked="true" />
+		<Page Name="[Data Page] ETA_INPUT_FACTOR_B" PageGUID="2B8A8E33-A1F9-45E6-A82A-1616CFB6B34B" Marked="true" />
+		<Page Name="[Data Page] STORAGE_CAPACITY" PageGUID="DC19FA8F-87D4-46FB-B48D-2923B21B9704" />
+		<Page Name="[Data Page] STORAGE_DURATION" PageGUID="356E90AD-681F-48F4-90E4-A5AA75C07A0E" />
+		<Page Name="[Data Page] STORAGE_EFFICIENCY" PageGUID="1D0F24DE-77FB-40CA-B65D-564FCC3F7EB0" />
+		<Page Name="[Data Page] VOLL" PageGUID="17971D87-2EAB-4BB8-B597-75DA38B523D9" />
+		<Page Name="[Data Page] VOM" PageGUID="D003D0E2-B162-43F7-BC6A-41BC83E24D77" />
+		<Page Name="[Data Page] CURTAIL_COST" PageGUID="CE73D291-D7B8-4851-9C37-ABC786CE4C35" />
+		<Page Name="[Data Page] ExogSupplyComm" PageGUID="364F3168-2879-4C21-A532-24D4B83C160E" Marked="true" />
+		<Page Name="[Data Page] M_TECH_LOCATION_MAP" PageGUID="916B144E-89AA-4CAF-9015-17DDD2D45FF2" />
+		<Page Name="[Data Page] CO2_CaptureRate" PageGUID="FF4D60A9-B127-43F2-ABAB-BA0B3BDE38C8" />
+		<Page Name="[Data Page] ETA_InputFactor" PageGUID="8820297A-674A-43B3-BC26-5254AC092275" />
+		<Page Name="[Data Page] CommodityCost" PageGUID="34024E97-C2A5-4D5D-9A04-ACAC7ECB75FB" />
+		<Page Name="[Data Page] CrossBorderNetwork_VOM" PageGUID="AFA3F277-F2BE-4391-A707-F6700B6A4CFC" />
+		<Page Name="[Data Page] NETWORK_FLOW_TYPE" PageGUID="E133BE55-6E9E-4A53-B63F-601BB0AFE9B3" />
+		<Page Name="[Data Page] NodeCapacity" PageGUID="322F88E3-F477-4DB8-8EFE-683EB5368E80" />
+		<Page Name="[Data Page] NodeLosses" PageGUID="CF16D077-1642-4EC0-B5F2-585607B1214C" />
+		<Page Name="[Data Page] CrossBorderNetwork_FOM" PageGUID="ADDF73C5-B378-4051-A733-ED0D531B0D83" />
+		<Page Name="[Data Page] NationaNetwork_VOM" PageGUID="D117C792-155E-485B-B6C5-A3746B11A0B0" />
+		<Page Name="[Data Page] CrossBorderCapex" PageGUID="AC9B0515-81CB-4A89-AF76-C59FFD264574" />
+		<Page Name="[Data Page] NationalNetworkCapex" PageGUID="56FEF4A2-715B-4202-9551-899A40203494" />
+		<Page Name="[Data Page] NationalNetwork_VOM" PageGUID="219191E4-DAB8-4987-AC96-BB87586F441A" />
+		<Page Name="[Data Page] COMMODITY_MAP" PageGUID="4389927F-CF80-4F33-8AF1-991F81649C47" />
+		<Page Name="[Data Page] VRECurtailCost" PageGUID="D81B1CCC-D88D-4BB7-ACC4-9936384FF158" />
+		<Page Name="[Data Page] NodeToNode_Capacity" PageGUID="5AB16693-DA0D-4DE4-9918-CD52AEB0E07A" />
+		<Page Name="[Data Page] kf_crossborder" PageGUID="188F8E28-C003-413F-9E83-16C16860F774" />
+		<Page Name="[Data Page] kf_national" PageGUID="95EF0E30-42E6-4F60-BEB0-B38A389913A2" />
+		<Page Name="[Data Page] x_consumption" PageGUID="335C157F-FC46-45D3-B01B-99A290DBD357" />
+		<Page Name="[Data Page] ks" PageGUID="63DBF1D7-0095-4E27-AD65-5C963026A2CA" />
+		<Page Name="[Data Page] g_conversion" PageGUID="5A769672-DB0F-4E01-A0E9-CFC1CAFC0100" />
+		<Page Name="[Data Page] load_shed" PageGUID="C04F9F9C-D7C9-4CE8-9AAB-4621F0088D29" />
+		<Page Name="[Data Page] NodeToNode" PageGUID="2211FEC4-51AC-4470-9F8A-13B9BB7755A7" />
+		<Page Name="[Data Page] NodeToNode_Commodity_Map" PageGUID="8F9B70ED-5BC6-44F9-9E35-09A45CE73D51" />
+		<Page Name="[Data Page] kg" PageGUID="9E79D647-6B9C-43A6-B47D-2BAE7E74D49C" />
+		<Page Name="[Data Page] s_exog_supply" PageGUID="59B84A4A-2D30-49DB-9607-1EAF5CC35973" />
+		<Page Name="[Data Page] INPUT_OUTPUT_TECH" PageGUID="62FA3330-441A-4E17-9D2E-E4FD139822AA" />
+		<Page Name="[Data Page] TECH_OUTPUT_MAP" PageGUID="E7ECCC3E-026C-4A15-87FB-EA4A5654B6F4" />
+		<Page Name="[Data Page] TECH_INPUT_MAP" PageGUID="EC1D2055-33D8-40E0-B8F2-A4B6D74BE313" />
+		<Page Name="[Data Page] INPUT_COMM_MAP" PageGUID="DDAF9F68-F6BB-4E63-8F07-63D014FDF2CD" />
+		<Page Name="[Data Page] OUTPUT_COMM_MAP" PageGUID="4A046354-4091-4928-9999-934D62CA6D2D" />
+		<Page Name="[Data Page] sdfsf" PageGUID="24CBB7EE-9BA5-4B31-8A2E-0CB3D7C681C4" Marked="true" />
+		<Page Name="[Data Page] Copy_COMMODITY_MAP" PageGUID="66AEE4CC-A777-4742-8A10-035DCD95AE9D" Marked="true" />
+		<Page Name="[Data Page] p_conversion" PageGUID="DACF4297-D50B-420F-A9EF-DC158DE7D447" />
+		<Page Name="[Data Page] d_discharge" PageGUID="8FEAB32B-6C67-4EDB-B625-09D9CAF56374" />
+		<Page Name="[Data Page] c_charge" PageGUID="0E4373B7-EB08-403C-BECE-2C6A8D928A67" />
+		<Page Name="[Data Page] f_crossborder" PageGUID="E9FE08A9-B4AA-4EA0-9294-4DD99D795B67" />
+		<Page Name="[Data Page] z_CO2_Capture" PageGUID="CBB2A416-9552-40F5-B24F-94B36A1EF7F6" />
+		<Page Name="[Data Page] nodal_balance_constraint" PageGUID="C07867F8-1DCE-472C-A89E-D727E81052E8" />
+		<Page Name="[Data Page] e_CO2_emissions" PageGUID="22A33419-A224-428F-9853-9B4DB2E8024D" />
+		<Page Name="[Data Page] ETA_InOutFactor" PageGUID="F6CB5F84-8787-4D77-9892-3BA2C6D7C900" />
+		<Page Name="[Data Page] ETA_InpOutFactorB" PageGUID="C99A303A-23C6-4FB3-91F5-C894059C2B16" Marked="true" />
+		<Page Name="[Data Page] EXOG_SUPPLY" PageGUID="7051B31D-8D15-4552-8EF2-3CC6DFB3AE3E" Marked="true" />
+		<Page Name="[Data Page] Copy_NodeToNode_Commodity_Map" PageGUID="FCC165C2-5D3F-4F62-A372-46C8821F2207" />
+		<Page Name="[Data Page] ConverstionCapacity" PageGUID="21A79F71-3EDF-4CFF-948C-940D81507F0C" />
+		<Page Name="[Data Page] CapacityFactor_VRE" PageGUID="E10A575C-8211-4C78-9029-A07DD5054181" />
+		<Page Name="[Data Page] CommFlowMap" PageGUID="55C49662-7E54-4FED-BB04-BDF174E4EF95" />
+		<Page Name="[Data Page] SDFDSF" PageGUID="67E69ECC-3143-4AE3-A0C8-1A9BC44652F7" Marked="true" />
+		<Page Name="[Data Page] storage_level_intra" PageGUID="1C9137F0-60F8-4660-AF04-8FB947FC3E4E" />
+		<Page Name="[Data Page] Copy_e_CO2_emissions" PageGUID="BF5FE407-7C1F-41F3-BFAC-F42F3187C581" Marked="true" />
+		<Page Name="[Data Page] StorageDuration" PageGUID="D40047E7-0F39-43FB-B922-B64563AB8621" />
+		<Page Name="[Data Page] e_CO2_negative_emissions" PageGUID="BD0ACC31-EF9A-4BBC-9AA8-A4E15773C8F7" />
+		<Page Name="[Data Page] e_CO2_neutral_emissions" PageGUID="21BC50B9-E71C-4E18-B2E6-E2B36B04EDF0" />
+		<Page Name="[Data Page] StorageEfficiency" PageGUID="FB931BF6-BCE4-4AA5-83BD-C9F56A6B9FA7" />
+		<Page Name="[Data Page] e_CO2_emissions_released" PageGUID="D3472179-846A-4B38-A636-FF5119489418" Marked="true" />
+		<Page Name="[Data Page] conversion_upper_limit" PageGUID="6E500BAC-F6B3-477B-A76A-A536CD111870" />
+		<Page Name="[Data Page] f_national" PageGUID="9DF3DDEF-BF64-4F27-B79F-55CE1D015567" />
+		<Page Name="[Data Page] vre_curtail" PageGUID="B3F36344-2754-4037-88AC-1854A6A978A5" />
+		<Page Name="[Data Page] TECH_LOCATION_MAP" PageGUID="F2DF3D87-A98C-48F7-A794-ECE80501D6F2" />
+		<Page Name="[Data Page] cvgcb" PageGUID="7FAC7643-22D9-47C3-8951-BD01097854D9" Marked="true" />
+		<Page Name="[Data Page] StorageCapacity" PageGUID="6C1E3BB9-EFB2-444D-A74F-785BA56CF13A" />
+		<Page Name="[Data Page] DEMAND" PageGUID="07CB06E9-56A9-4743-9DEF-FDF6DA030A0F" />
+		<Page Name="[Data Page] dsfsdfd" PageGUID="CAF844E8-AF4A-4064-890E-6A0740D0F37D" Marked="true" />
+		<Page Name="[Data Page] CX_NetworkMap" PageGUID="C4E83D50-ED55-486E-8FFB-1A63B896AD59" />
+		<Page Name="[Data Page] ETA_InputFactorB" PageGUID="08A55760-6DB8-429A-8541-13CD4B898796" Marked="true" />
+		<Page Name="[Data Page] EXOG_CO2_EMISSIONS" PageGUID="36E66800-65D1-4C52-88B5-E2B38DFF294E" />
+		<Page Name="[Data Page] TIMESEQUENCE_MATRIX" PageGUID="F3D42D97-0D46-467E-9C5D-56C1143D9B7A" />
+		<Page Name="[Data Page] d_dischargeEV" PageGUID="F4099130-6681-43CA-BB80-E080884CED80" />
+		<Page Name="[Data Page] g_EV_conversion" PageGUID="ED4DB1FE-CEB7-4D38-BDBF-DFAD9B405A20" />
+		<Page Name="[Data Page] storage_level_inter" PageGUID="DD00F098-12D1-4433-9B97-5B4491EAA8B3" />
+		<Page Name="[Data Page] CO2_emissions_r" PageGUID="49C0BAF7-E898-45B2-9FDC-6A5B90312DBF" />
+		<Page Name="[Data Page] CO2_negative_emissions_r" PageGUID="D8843BE5-5233-4680-835A-98EE6ACE8914" />
+		<Page Name="[Data Page] r_ConversionCapacity" PageGUID="D39AD2AD-4615-47D1-A5FB-82CE9DB94743" />
+		<Page Name="[Data Page] r_NetworkCapacity_crossborder" PageGUID="114163B5-8562-4E31-9D5B-1DA744F1CA0C" />
+		<Page Name="[Data Page] r_NetworkCapacity_national" PageGUID="F10E05B7-B226-41D0-8C41-E50CFA9A968B" />
+		<Page Name="[Data Page] r_CO2_emissions" PageGUID="3F5BF1AD-D8B3-49E2-88A2-8BE3B07EF9E0" />
+		<Page Name="[Data Page] r_CO2_negative_emissions" PageGUID="35E6CA73-F8C3-437B-9AD4-48335A65B2A6" />
+		<Page Name="[Data Page] r_CO2_neutral_emissions" PageGUID="5B2B5FBA-2E4E-433A-BA6D-0F01F7E90A66" />
+		<Page Name="[Data Page] r_conversion" PageGUID="F215C036-7D7A-492C-A35B-9B9FFA49CC77" />
+		<Page Name="[Data Page] r_storage_level" PageGUID="B354850B-C135-4714-983F-D4AA694A2386" />
+		<Page Name="[Data Page] r_VRE_curtailment" PageGUID="65C4891B-26C3-47C2-9DBA-E50987137199" />
+		<Page Name="[Data Page] r_conversion_a" PageGUID="64FE7A31-A20F-4BCB-BD4F-17E267F43CC4" />
+		<Page Name="[Data Page] r_EV_conversion_a" PageGUID="43A5E788-5314-4D5C-977D-619885CE76D7" />
+		<Page Name="[Data Page] r_CO2_Capture_a" PageGUID="FBC5D0BC-BF5C-4ABC-B04E-416D9C37072B" />
+		<Page Name="[Data Page] r_storage_level_a" PageGUID="CDE1C83D-8B1E-4DD1-ACFE-DD95FB1392A8" />
+		<Page Name="[Data Page] r_discharge_a" PageGUID="34988D28-5B62-42E2-B589-9A601CE5333F" />
+		<Page Name="[Data Page] r_VRE_curtailment_a" PageGUID="9D9A4C5F-538F-4BA4-826B-81313087620E" />
+		<Page Name="[Data Page] r_crossborder_flow_a" PageGUID="34599619-706B-4D0B-9A6F-0AA2C9DF2535" />
+		<Page Name="[Data Page] r_CO2_neutral_emissions_a" PageGUID="5E77222D-3255-4CED-AD5A-07DC71742D20" />
+		<Page Name="[Data Page] Ar_StorageCapacity_r" PageGUID="B5F6707F-D7B5-411A-8E21-77CB651886EC" />
+		<Page Name="[Data Page] Ar_opex_network_n" PageGUID="F4F12E47-D8D5-441A-8413-D5BA7604B5B3" />
+		<Page Name="[Data Page] Ar_opex_network_CB" PageGUID="BC980C77-D18D-4259-BAF4-6FE24A66B113" />
+		<Page Name="[Data Page] Ar_opex_commodity" PageGUID="27162C89-F15A-40DC-90EA-4F69C0EED82A" />
+		<Page Name="[Data Page] Ar_opex_conversion" PageGUID="8FBDA8C0-DD6F-4A36-A064-3A1D2720834E" />
+		<Page Name="[Data Page] Ar_opex_storage" PageGUID="F4E8A29C-329E-4772-9C6C-3A324F1F1649" />
+		<Page Name="[Data Page] Ar_FinalConsumption" PageGUID="643E059E-EC9B-4AEC-B569-6140590BF8DB" />
+		<Page Name="[Data Page] Copy_NETWORK_FLOW_TYPE" PageGUID="72DBF3A0-84CD-4314-85AA-39C43AAC9AE0" />
+		<Page Name="[Data Page] INPUT_MAPPING" PageGUID="36FF1D61-747C-4480-8581-AB776B743B58" />
+		<Page Name="[Data Page] Copy_INPUT_MAPPING" PageGUID="B210D014-633C-45C6-BFA5-A2745B0BFE65" />
+		<Page Name="[Data Page] x_input_requirements" PageGUID="B6214EBE-57D1-4E4C-BC86-A83339B54AF3" />
+		<Page Name="[Data Page] xcdvxdcvc" PageGUID="9AFE6C64-6044-42B0-B7DB-38FA69EE7B68" Marked="true" />
+		<Page Name="[Data Page] STORAGE_INPUT_MAPPING" PageGUID="89C1EFB6-A28D-4693-9B78-C21B80153550" />
+		<Page Name="[Data Page] Hr_CO2_emissions" PageGUID="8ED6995B-81C8-4AB8-A43A-02E700B5A42B" />
+		<Page Name="[Data Page] Ar_CO2_CaptureStorage" PageGUID="1A16B74A-8199-43C8-97ED-C185721662DA" />
+		<Page Name="[Data Page] Ar_CO2_emissions_net" PageGUID="6AD93DE2-D77E-4F3C-9D8C-728E13013D60" Marked="true" />
+		<Page Name="[Data Page] e_CO2_potential_negative" PageGUID="D0613746-6CEF-4A60-BA2C-9B33352F670E" Marked="true" />
+		<Page Name="[Data Page] e_CO2_emissions_non_neutral" PageGUID="96094F8D-202C-48A6-9D61-5AF7DF7393A8" />
+		<Page Name="[Data Page] Copy_z_CO2_Capture_neutral" PageGUID="195F38D7-2456-4F11-8E9F-E50B90EC7AD5" Marked="true" />
+		<Page Name="[Data Page] z_CO2_Capture_neutral" PageGUID="04CADFD9-6003-4990-9E5D-9BB3E5C5795A" />
+		<Page Name="[Data Page] e_CO2_emissions_neutral" PageGUID="EFAC3E7A-58A9-42AF-9CC2-6007C746EF2B" />
+		<Page Name="[Data Page] c_charge_CO2_neutral" PageGUID="24644220-6ADF-439F-A388-3D64B8E66B47" />
+		<Page Name="[Data Page] Ar_CO2_negative_emissions" PageGUID="ECE8695F-F57D-4713-8BD6-4C5C18D110B5" />
+		<Page Name="[Data Page] Ar_CO2_emissions_ALL" PageGUID="4E8373FB-9E20-4E0F-808F-7F7B95D34785" />
+		<Page Name="[Data Page] s_primary_supply" PageGUID="6B9955CD-D872-4208-BE39-1AAA29D7A4EF" />
+		<Page Name="[Data Page] AMB_TEMP" PageGUID="B38B644E-4D20-48B1-92DA-E9E60B177895" />
+		<Page Name="[Data Page] ETA_InputFactorHP" PageGUID="62047E87-7E59-4786-9A23-6368135EB43F" />
+		<Page Name="[Data Page] ETA_InpOutFactorHP" PageGUID="E95AE17E-FF7A-42AF-9B3B-2490B6D9B0C4" />
+		<Page Name="[Data Page] ElecNationalNetworkCapex" PageGUID="C17D9FD7-53F7-4F93-949E-F83C3972C062" Marked="true" />
+		<Page Name="[Data Page] NetworkMap" PageGUID="A49C0362-45AC-42B0-AFB5-9923E4AA5073" />
+		<Page Name="[Data Page] z_CO2_Capture_nonneutral" PageGUID="6B367404-872F-48DD-BE2F-B48288C05BAB" />
+		<Page Name="[Data Page] Copy_Hr_FinalConsumption" PageGUID="468D9808-828B-46E5-BB97-8CE2EA610414" Marked="true" />
+		<Page Name="[Data Page] Copy_PowerGenCapacity_Limit" PageGUID="E7DF4DB4-D1A1-45EE-B16E-58B4CD6E4A8D" Marked="true" />
+		<Page Name="[Data Page] Copy_Trans_Travel_Mileage" PageGUID="4506FF79-C9AE-48C0-8591-CDB9754FB68F" />
+		<Page Name="[Data Page] Trans_Travel_Mileage_Hourly" PageGUID="95FF352F-2FB1-4D00-845B-6172F1767E2D" />
+		<Page Name="[Data Page] c_charge_CO2_nonneutral" PageGUID="62459066-FA5C-4F97-B879-F405B999F84F" />
+		<Page Name="[Data Page] PowerGenCapacity_Limit" PageGUID="2A75F21D-C573-40E4-825F-7B23E23543E8" />
+		<Page Name="[Data Page] sdefsdf" PageGUID="7F4B891D-9170-4FD1-9E91-7F7B41214460" Marked="true" />
+		<Page Name="[Data Page] Ar_ConversionConsumption" PageGUID="83AC46DB-5DFD-4A29-927C-6F2D19F4B771" />
+		<Page Name="[Data Page] Ar_VRE_gen" PageGUID="D77AEBC6-8D4A-4246-A719-46FCB88D7712" Marked="true" />
+		<Page Name="[Data Page] Ar_ConversionConsProd" PageGUID="A12ADCFA-FF25-4173-9545-64D19F3B6574" />
+		<Page Name="[Data Page] Hr_charge" PageGUID="46C28C5F-3C7E-41DA-83F9-6DC8B18C6948" />
+		<Page Name="[Data Page] Hr_discharge" PageGUID="AEEC6B03-B92F-4DE3-8E14-A22F45A7E088" />
+		<Page Name="[Data Page] Ar_charge" PageGUID="97AA9DFC-3F01-4EA4-8908-7F1FB4D2C3A6" />
+		<Page Name="[Data Page] Ar_ConvStorConsProd" PageGUID="1592DAF4-1BD6-406D-A7A8-B1FD19017D19" />
+		<Page Name="[Data Page] Ar_StockChange" PageGUID="777316A6-6D43-48C2-8011-862B293E1C6E" />
+		<Page Name="[Data Page] Ar_discharge" PageGUID="BA2CC2D2-9A63-45DA-BAF2-3596876C8DB9" />
+		<Page Name="[Data Page] CountryMapping" PageGUID="4ADEE737-CD7C-4862-A22E-D1E92EDDAB51" />
+		<Page Name="[Data Page] Ar_ConvConsProd" PageGUID="D767D65B-AA20-46D2-AD2B-5CF427893EF3" />
+		<Page Name="[Data Page] Hr_FinalConsumption" PageGUID="4BEA52CE-7650-436C-904B-B9FDE22069A5" />
+		<Page Name="[Data Page] Ar_conversion" PageGUID="DA7B8FC8-37A4-401D-8569-F77E7337981E" />
+		<Page Name="[Data Page] Copy_IND_CO2_EMISSIONS" PageGUID="C043952B-2FB9-44D9-89F7-20AF7C14BA2D" Marked="true" />
+		<Page Name="[Data Page] Ar_CO2_emissions_total_endogenous" PageGUID="684FF427-DE25-45F0-B55F-0468093BBAF7" />
+		<Page Name="[Data Page] NetworkLosses" PageGUID="92CF0BB1-83BE-4C67-9216-2FA4445C09BB" />
+		<Page Name="[Data Page] Ar_StorageEVCapacity" PageGUID="8C51FD15-4591-482B-8CD4-2F7B0E7FEE54" />
+		<Page Name="[Data Page] Copy_Ar_ConversionConsumption" PageGUID="0E6E7D61-B6B6-4BD4-A566-D011B5BDF1A9" Marked="true" />
+		<Page Name="[Data Page] g_conversion_ts" PageGUID="C2276DCA-3E54-40E6-8BEB-0D8CFC838614" />
+		<Page Name="[Data Page] g_conversion_initial" PageGUID="B4CDD445-1310-444C-A239-33F6163556AB" />
+		<Page Name="[Data Page] Ar_crossborder_flow" PageGUID="E59DA6D5-4920-467A-9980-8106B59EC65A" />
+		<Page Name="[Data Page] Ar_CO2_emissions_non_final_demand_endogenous" PageGUID="1945E27E-12FC-400B-8951-687C8364D3D1" />
+		<Page Name="[Data Page] Copy_PRIMARY_SUPPLY" PageGUID="A6C57C1C-04B9-4E71-A2BC-750D97BAB99B" Marked="true" />
+		<Page Name="[Data Page] Copy_s_primary_supply" PageGUID="D8364399-7A9A-4953-9313-6D7D24465CE6" Marked="true" />
+		<Page Name="[Data Page] AGR_EXOG_CO2_EMISSIONS" PageGUID="22D71CDE-4ADB-4386-A432-818B1C3BEB9F" />
+		<Page Name="[Data Page] Copy_kg" PageGUID="36332378-5914-485E-8387-7317F4FD6046" Marked="true" />
+		<Page Name="[Data Page] Ar_CO2_emissions_non_final_demand" PageGUID="A8429B20-0CF0-4267-9B17-6EEE136DFE90" />
+		<Page Name="[Data Page] TotalPrimarySupply" PageGUID="F26B79F4-E95E-4937-8E0F-5B986F030EE3" />
+		<Page Name="[Data Page] Copy_CX_NetworkMap" PageGUID="68E0AACE-F2B4-4A07-86AA-2BAA20276B3A" Marked="true" />
+		<Page Name="[Data Page] Backstop_CO2removalCost" PageGUID="84CD5B91-29DC-453C-9E79-985AACE26AB9" Marked="true" />
+		<Page Name="[Data Page] kg_DAC" PageGUID="36FC7330-8FAB-4CC4-A493-518D289303AB" Marked="true" />
+		<Page Name="[Data Page] z_CO2_DAC_Capture_neutral" PageGUID="5BC7D21B-F4D8-4C2A-9DD3-A8F4F3C9313E" />
+		<Page Name="[Data Page] z_CO2_DAC_Capture_nonneutral" PageGUID="81C55D10-7A54-431E-A5A4-5A7802922E00" />
+		<Page Name="[Data Page] TidalWave_UB" PageGUID="90044CE5-4C5C-4F13-B9D0-388FBA63DF19" />
+		<Page Name="[Data Page] LULUCF_CO2_EMISSIONS" PageGUID="04198553-C3AC-4540-8B73-0D36540BEFEB" />
+		<Page Name="[Data Page] CrossBorderNetwork_VOM_NonZero" PageGUID="9B68559E-C328-4695-A0BE-8EBEF3D3DAA8" />
+		<Page Name="[Data Page] safnational_network_constraint" PageGUID="3BAE0A0C-EDB6-4902-AFD1-E7CB53853D85" Marked="true" />
+		<Page Name="[Data Page] Copy_kf_national" PageGUID="4F19280D-E0ED-4927-9A31-670AADD71D7D" Marked="true" />
+		<Page Name="[Data Page] Hr_conversion" PageGUID="8773D710-B959-41B9-AF46-1702532BF9E8" />
+		<Page Name="[Data Page] sdfnskdn" PageGUID="9025719B-7FF7-4F3B-ACB7-B7F9EA431379" Marked="true" />
+		<Page Name="[Data Page] werwerhwer" PageGUID="C93648E1-A68B-4E7D-BFD3-9C3A8922E12B" Marked="true" />
+		<Page Name="[Data Page] werhwkejrh" PageGUID="A3C95C4A-76E0-4D78-9217-A6B645C849CF" Marked="true" />
+		<Page Name="[Data Page] ks_EV" PageGUID="6B9BC172-97BA-41D4-957A-59FC8F88984E" />
+		<Page Name="[Data Page] EV_Trans_Travel_Mileage_Hourly" PageGUID="2349632F-1397-4E38-A3B7-028C5597CF6B" />
+		<Page Name="[Data Page] EV_ElectricityRequirement_PerVehicle_Hourly" PageGUID="52838911-56BA-4F59-8836-B3F521E18847" />
+		<Page Name="[Data Page] ererer" PageGUID="823F0CBF-7DBC-44DB-9E28-D655B0A33100" Marked="true" />
+		<Page Name="[Data Page] sdfds" PageGUID="5D14D6A1-173B-42A8-932C-9C65081FC620" Marked="true" />
+		<Page Name="[Data Page] Copy_c_charge" PageGUID="57BD9B7D-3E4C-4337-806F-DE040BF04A9A" Marked="true" />
+		<Page Name="[Data Page] ratio_of_energy_to_batt_cap" PageGUID="B06F13DE-CD6A-4815-AC3A-04EE70776FD1" Marked="true" />
+		<Page Name="[Data Page] EV_storage_level_inter" PageGUID="F2A35C04-7C9B-4CF3-AF58-349D5A57E120" Marked="true" />
+		<Page Name="[Data Page] storage_level_intra_initial" PageGUID="4BFDB687-22AE-4C6B-963A-9219ACBD5B07" Marked="true" />
+		<Page Name="[Data Page] TRANS_OTH_CO2_EMISSIONS" PageGUID="8E310785-6021-4441-A500-98C34496CDD8" />
+		<Page Name="[Data Page] dfgdfg" PageGUID="845659AE-AE1C-4906-B89F-49DE36A76332" Marked="true" />
+		<Page Name="[Data Page] Total_EV_storage_state" PageGUID="8F73BAE1-0AF0-4379-A715-AC37ED34DAC3" Marked="true" />
+		<Page Name="[Data Page] StockTOCapacity" PageGUID="08D06A6A-613D-4CE8-802E-2369ED19D4C0" />
+		<Page Name="[Data Page] Hr_storage_level" PageGUID="4140BAA5-0323-4D34-8EBF-3D4AB4861CA6" />
+		<Page Name="[Data Page] Copy_storage_level_inter" PageGUID="3E04D990-D804-4542-8BDA-7BDCE972AF4D" Marked="true" />
+		<Page Name="[Data Page] total_storage_level_state" PageGUID="264CC773-3F54-404C-AB45-9507D84B3971" />
+		<Page Name="[Data Page] EV_UB" PageGUID="158E8208-8AAA-4BDA-89CF-35D3B1738D30" />
+		<Page Name="[Data Page] EV_constraint_1" PageGUID="6DE40120-FBBF-4939-B3C3-9F76CADC6719" Marked="true" />
+		<Page Name="[Data Page] pmt_factor_national_networks" PageGUID="182B55ED-4713-4163-B481-799BD0C724C6" />
+		<Page Name="[Data Page] e_CO2_biomethane_upgrade_neutral" PageGUID="857965BF-04F8-4F75-B355-039E358908B2" />
+		<Page Name="[Data Page] Copy_e_CO2_biomethane_upgrade_neutral" PageGUID="813F5DBF-8941-49DB-8208-5F888EBE8E9C" Marked="true" />
+		<Page Name="[Data Page] NON_CO2_EMISSIONS" PageGUID="607B6A7A-C169-4D62-AE43-D823D41D1AA2" />
+		<Page Name="[Data Page] Hr_CO2_neutral_emissions" PageGUID="2CB29789-2A87-4519-A75A-1D63B951A312" />
+		<Page Name="[Data Page] national_network_capacity_sens" PageGUID="82A382B1-25D9-413A-8491-CCF19AB45AA7" />
+		<Page Name="[Data Page] conversion_capacity_sens" PageGUID="F98B430B-8838-45E3-A2EF-1A100C9AB7D2" />
+		<Page Name="[Data Page] national_network_cost_sens" PageGUID="F79B806A-73E3-4F1B-8FAF-7B96F75B882F" />
+		<Page Name="[Data Page] national_network_cost_sens_Z" PageGUID="9682AA59-53CE-4810-9A95-8929EB903B4B" />
+		<Page Name="[Data Page] national_network_cost_sens_Z_check" PageGUID="6E09AE2C-7136-42D7-B825-597F796080EB" Marked="true" />
+		<Page Name="[Data Page] conversion_cost_sens_Z" PageGUID="F64116CD-FE8E-4658-9E6A-904112651B95" />
+		<Page Name="[Data Page] Hr_wind_offshore" PageGUID="6452CE2E-E0FB-4C97-931C-2E1263B80A03" />
+		<Page Name="[Data Page] Hr_solar" PageGUID="E636BA4E-2D85-4E84-9A51-55A105130326" />
+		<Page Name="[Data Page] Hr_H2_Electrolysis" PageGUID="35E5EC2B-7A44-4239-A9D0-C59CAC5D5B7F" />
+		<Page Name="[Data Page] Hr_H2_NG_Reformation" PageGUID="C66FFF04-2AF9-42CA-9F4F-19F69EE0748F" />
+		<Page Name="[Data Page] Hr_VRE_total_curtailment" PageGUID="A1598A04-7121-4B64-94FC-E5C8D253B0FB" />
+		<Page Name="[Data Page] Hr_wind_onshore" PageGUID="26597A57-0B4F-4EAF-BD40-7C96D0D936B2" />
+		<Page Name="[Data Page] wholesale_cost" PageGUID="C0E6541E-97A1-4E93-A7A2-CFBBB0C70404" />
+		<Page Name="[Data Page] Ar_opex_commodity_cost_usage" PageGUID="F808A2A8-6161-482D-AE59-199742A26C9F" />
+		<Page Name="[Data Page] Ar_capex_conversion_technology" PageGUID="9B000057-9F21-4D33-9447-1F63805587D8" />
+		<Page Name="[Data Page] conversion_cost_sens" PageGUID="969F2BBB-5794-4208-93FB-2118EA8EDDAD" />
+		<Page Name="[Data Page] storage_cost_sens_Z" PageGUID="BC3BC540-D057-49A3-AB53-E60B0C4EEA23" />
+		<Page Name="[Data Page] IND_CO2_EMISSIONS" PageGUID="A2331FF4-A8C5-4E24-B707-002A863AD365" />
+		<Page Name="[Data Page] Hr_Green_H2" PageGUID="E2F4BE06-C42B-48B8-A488-597F99911CE4" />
+		<Page Name="[Data Page] Hr_VRE_total_curtailment2" PageGUID="48496DA1-B6C4-4757-A85F-0176C9DABEC9" />
+		<Page Name="[Data Page] Hr_Blue_H2" PageGUID="5DA54965-860B-4491-B913-8FB9073B8F55" />
+		<Page Name="[Data Page] Hr_wind_onshore2" PageGUID="CAE6742D-AAC3-4001-9D24-9E2154C77190" />
+		<Page Name="[Data Page] Hr_wind_offshore2" PageGUID="4E6EAC72-A1A2-48B3-98DE-A86F8DE456D8" />
+		<Page Name="[Data Page] Hr_solar2" PageGUID="2789CDB1-DD92-43AA-8378-0A8DA8CA36D5" />
+		<Page Name="[Data Page] Hr_storage_level_by_comm" PageGUID="3C1E0EB8-7991-4BE6-9E46-8CB618E29470" />
+		<Page Name="[Data Page] Ar_EV_discharge_to_grid" PageGUID="F719F0D3-168E-408E-9B16-19783FED99C3" />
+		<Page Name="[Data Page] Max_EV_discharge_to_grid" PageGUID="448FED3C-115D-4FFE-A9FF-B154ACF922D7" />
+		<Page Name="[Data Page] Ar_capex_storage_technology" PageGUID="799E4E56-5D20-4E94-86DB-68101377ECCB" />
+		<Page Name="[Data Page] Ar_opex_conversion_road" PageGUID="FA182A58-93E7-40F6-B888-5B8685D69289" />
+	</Page>
+</PageManager>
