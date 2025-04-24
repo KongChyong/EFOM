@@ -4,10 +4,10 @@ The Energy Futures Optimisation Model (EFOM) is a partial equilibrium, linear pr
 
 EFOM is formulated in AIMMS, a modelling environment for optimisation-based applications, and solved using the IBM CPLEX solver.
 
-The model minimises total energy system costs—including capital and operational expenditures—while satisfying exogenous energy service demand, greenhouse gas (GHG) constraints, and other user-defined restrictions. It operates with hourly resolution and represents 27 European and global regions, enabling endogenous trade in primary and secondary energy carriers.
+The model minimises total energy system costs—including capital and operational expenditures—while satisfying exogenous energy service demand, greenhouse gas (GHG) constraints, and other user-defined restrictions. It operates with hourly resolution and represents 14 European regions, enabling endogenous trade in primary and secondary energy carriers.
 
 **🔧 Key Features:**
-- Supply & transformation sectors: Fossil fuels, renewables, nuclear, hydrogen (electrolysis and methane reformation), synthetic fuels, and LNG infrastructure.
+- Supply & transformation sectors: Fossil fuels, renewables, nuclear, hydrogen (electrolysis and methane reformation), and synthetic fuels.
 
 - Final consumption: Disaggregated representation of buildings, transport, and industry.
 
